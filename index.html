@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>随机决策转盘</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
+  <style>
+    /* =============================================
+       CSS 变量 - 由当前场景动态更新
+       ============================================= */
+    :root {
+      --primary-color: #FF6B6B;
+      --secondary-color: #4ECDC4;
+      --accent-color: #FFE66D;
+      --bg-color: #1a1a2e;
+      --card-bg: #16213e;
+      --text-color: #ffffff;
+      --text-secondary: #a0a0b0;
+      --shadow-color: rgba(0, 0, 0, 0.3);
+      --border-radius: 24px;
+      --font-display: 'ZCOOL XiaoWei', serif;
+      --font-body: 'Noto Sans SC', sans-serif;
+
+      /* 侧边栏相关变量 */
+      --sidebar-width: 260px;
+      --sidebar-collapsed-width: 60px;
+      --sidebar-bg: rgba(22, 33, 62, 0.95);
+      --sidebar-item-hover: rgba(255, 255, 255, 0.08);
+      --sidebar-item-active: rgba(255, 107, 107, 0.15);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-color);
+      color: var(--text-color);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(ellipse at 20% 50%, rgba(255, 107, 107, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(78, 205, 196, 0.12) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 80%, rgba(255, 230, 109, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* =============================================
+       侧边栏样式
+       ============================================= */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: var(--sidebar-bg);
+      backdrop-filter: blur(12px);
+      border-right: 1px solid rgba(255, 255, 255, 0.06);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1), transform 0.35s ease;
+      box-shadow: 4px 0 24px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+    }
+
+    .sidebar.collapsed {
+      width: var(--sidebar-collapsed-width);
+    }
+
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      min-height: 64px;
+    }
+
+    .sidebar-title {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      opacity: 1;
+      transition: opacity 0.25s ease;
+    }
+
+    .sidebar.collapsed .sidebar-title {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .sidebar-toggle {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      color: var(--text-color);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .sidebar-toggle:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: scale(1.1);
+    }
+
+    .sidebar-toggle svg {
+      width: 18px;
+      height: 18px;
+      transition: transform 0.35s ease;
+    }
+
+    .sidebar.collapsed .sidebar-toggle svg {
+      transform: rotate(180deg);
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 10px;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .sidebar-nav-label {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 8px 10px;
+      white-space: nowrap;
+      overflow: hidden;
+      opacity: 1;
+      transition: opacity 0.25s ease;
+    }
+
+    .sidebar.collapsed .sidebar-nav-label {
+      opacity: 0;
+    }
+
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      overflow: hidden;
+      margin-bottom: 4px;
+      position: relative;
+    }
+
+    .sidebar-item:hover {
+      background: var(--sidebar-item-hover);
+    }
+
+    .sidebar-item.active {
+      background: var(--sidebar-item-active);
+    }
+
+    .sidebar-item.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 60%;
+      border-radius: 0 3px 3px 0;
+      background: var(--primary-color);
+    }
+
+    .sidebar-item-icon {
+      font-size: 1.3rem;
+      flex-shrink: 0;
+      width: 28px;
+      text-align: center;
+    }
+
+    .sidebar-item-text {
+      font-size: 0.9rem;
+      font-weight: 500;
+      opacity: 1;
+      transition: opacity 0.25s ease;
+    }
+
+    .sidebar.collapsed .sidebar-item-text {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .sidebar-item-count {
+      margin-left: auto;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      background: rgba(255, 255, 255, 0.06);
+      padding: 2px 8px;
+      border-radius: 10px;
+      opacity: 1;
+      transition: opacity 0.25s ease;
+    }
+
+    .sidebar.collapsed .sidebar-item-count {
+      opacity: 0;
+    }
+
+    .sidebar-footer {
+      padding: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      opacity: 1;
+      transition: opacity 0.25s ease;
+    }
+
+    .sidebar.collapsed .sidebar-footer {
+      opacity: 0;
+    }
+
+    /* =============================================
+       主内容区
+       ============================================= */
+    .main-content {
+      flex: 1;
+      margin-left: var(--sidebar-width);
+      transition: margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      z-index: 1;
+      min-width: 0;
+    }
+
+    .sidebar.collapsed ~ .main-content {
+      margin-left: var(--sidebar-collapsed-width);
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      animation: fadeInDown 0.8s ease-out;
+    }
+
+    .header h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      background: linear-gradient(135deg, var(--primary-color), var(--accent-color), var(--secondary-color));
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradientFlow 4s ease infinite;
+      margin-bottom: 12px;
+      transition: opacity 0.3s ease;
+    }
+
+    .header p {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      letter-spacing: 1px;
+    }
+
+    .wheel-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+      margin-bottom: 48px;
+    }
+
+    .wheel-container {
+      position: relative;
+      width: clamp(300px, 70vw, 450px);
+      height: clamp(300px, 70vw, 450px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .wheel-container::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 110%;
+      height: 110%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: conic-gradient(
+        from 0deg,
+        rgba(255, 107, 107, 0.3),
+        rgba(78, 205, 196, 0.3),
+        rgba(255, 230, 109, 0.3),
+        rgba(255, 107, 107, 0.3)
+      );
+      filter: blur(20px);
+      z-index: 0;
+    }
+
+    .wheel-container.spinning::before {
+      animation: glowPulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes glowPulse {
+      0%, 100% {
+        opacity: 0.6;
+        transform: translate(-50%, -50%) scale(1);
+      }
+      50% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.05);
+      }
+    }
+
+    #wheelCanvas {
+      position: relative;
+      z-index: 1;
+      border-radius: 50%;
+      box-shadow: 
+        0 0 40px rgba(0, 0, 0, 0.4),
+        inset 0 0 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .pointer {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 18px solid transparent;
+      border-right: 18px solid transparent;
+      border-top: 36px solid var(--primary-color);
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+      z-index: 2;
+      transition: transform 0.08s ease-out;
+    }
+
+    .pointer::after {
+      content: '';
+      position: absolute;
+      top: -42px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 12px;
+      height: 12px;
+      background: var(--primary-color);
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(255, 107, 107, 0.6);
+    }
+
+    .spin-btn {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, var(--primary-color), #ff8e53);
+      color: white;
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      cursor: pointer;
+      box-shadow: 
+        0 8px 24px rgba(255, 107, 107, 0.4),
+        0 4px 12px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .spin-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .spin-btn:hover:not(:disabled)::before { opacity: 1; }
+    .spin-btn:hover:not(:disabled) {
+      transform: scale(1.08);
+      box-shadow: 
+        0 12px 32px rgba(255, 107, 107, 0.5),
+        0 6px 16px rgba(0, 0, 0, 0.4);
+    }
+    .spin-btn:active:not(:disabled) { transform: scale(0.98); }
+
+    .spin-btn:disabled {
+      background: linear-gradient(135deg, #666, #888);
+      cursor: not-allowed;
+      box-shadow: none;
+      opacity: 0.7;
+    }
+
+    .spin-btn.spinning {
+      animation: pulse 0.8s ease-in-out infinite;
+    }
+
+    .hint-text {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      min-height: 24px;
+    }
+
+    .hint-text.warning { color: #ff9f43; }
+
+    .options-section {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 32px;
+      box-shadow: 0 8px 32px var(--shadow-color);
+      animation: fadeInUp 0.8s ease-out 0.2s both;
+    }
+
+    .options-section h2 {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      color: var(--accent-color);
+    }
+
+    .options-input-group {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .options-input-group input {
+      flex: 1;
+      padding: 14px 18px;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-color);
+      font-family: var(--font-body);
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .options-input-group input::placeholder { color: var(--text-secondary); }
+    .options-input-group input:focus {
+      outline: none;
+      border-color: var(--secondary-color);
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 0 4px rgba(78, 205, 196, 0.2);
+    }
+
+    .add-btn {
+      padding: 14px 28px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--secondary-color), #38d9a9);
+      color: white;
+      font-family: var(--font-body);
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+    }
+
+    .add-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(78, 205, 196, 0.4);
+    }
+
+    .options-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      max-height: 240px;
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+
+    .options-list::-webkit-scrollbar { width: 6px; }
+    .options-list::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 3px; }
+    .options-list::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 3px; }
+
+    .option-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      font-size: 0.95rem;
+      animation: scaleIn 0.3s ease-out;
+      transition: all 0.2s ease;
+    }
+
+    .option-item:hover { background: rgba(255, 255, 255, 0.12); }
+
+    .option-item .remove-btn {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255, 107, 107, 0.3);
+      color: var(--primary-color);
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .option-item .remove-btn:hover {
+      background: var(--primary-color);
+      color: white;
+      transform: scale(1.15);
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.4s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 48px 40px;
+      max-width: 420px;
+      width: 90%;
+      text-align: center;
+      transform: scale(0.8) translateY(30px);
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .modal-overlay.active .modal {
+      transform: scale(1) translateY(0);
+    }
+
+    .modal::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color), var(--secondary-color));
+    }
+
+    .modal-emoji {
+      font-size: 4rem;
+      margin-bottom: 16px;
+      animation: bounce 0.6s ease-out;
+    }
+
+    .modal h3 {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+
+    .modal-result {
+      font-family: var(--font-display);
+      font-size: 2.2rem;
+      background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 24px;
+      animation: pulse 1s ease-in-out infinite;
+    }
+
+    .modal-close-btn {
+      padding: 14px 36px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary-color), #ff8e53);
+      color: white;
+      font-family: var(--font-body);
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .modal-close-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(255, 107, 107, 0.4);
+    }
+
+    .particles-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1001;
+      overflow: hidden;
+    }
+
+    .particle {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      animation: particleFall linear forwards;
+    }
+
+    /* 场景切换时的淡入动画 */
+    .scene-transition {
+      animation: sceneFadeIn 0.5s ease-out;
+    }
+
+    @keyframes sceneFadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes gradientFlow {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes bounce {
+      0% { transform: scale(0); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes particleFall {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+
+    @keyframes sidebarItemPulse {
+      0% { background-color: transparent; }
+      50% { background-color: var(--sidebar-item-active); }
+      100% { background-color: transparent; }
+    }
+
+    /* 移动端汉堡菜单按钮 */
+    .mobile-menu-btn {
+      display: none;
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 99;
+      width: 44px;
+      height: 44px;
+      border: none;
+      border-radius: 12px;
+      background: var(--card-bg);
+      color: var(--text-color);
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .mobile-menu-btn svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    /* 移动端遮罩 */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 99;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .sidebar-overlay.active {
+      display: block;
+      opacity: 1;
+    }
+
+    /* 响应式适配 */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        width: var(--sidebar-width) !important;
+      }
+
+      .sidebar.mobile-open {
+        transform: translateX(0);
+      }
+
+      .sidebar .sidebar-title,
+      .sidebar .sidebar-nav-label,
+      .sidebar .sidebar-item-text,
+      .sidebar .sidebar-item-count,
+      .sidebar .sidebar-footer {
+        opacity: 1 !important;
+      }
+
+      .main-content {
+        margin-left: 0 !important;
+      }
+
+      .mobile-menu-btn {
+        display: flex;
+      }
+
+      .container {
+        padding: 70px 16px 24px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .options-section { padding: 24px 20px; }
+      .options-input-group { flex-direction: column; }
+      .add-btn { width: 100%; }
+      .modal { padding: 36px 24px; }
+      .modal-result { font-size: 1.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 移动端汉堡菜单按钮 -->
+  <button id="mobileMenuBtn" class="mobile-menu-btn" aria-label="打开菜单">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </button>
+
+  <!-- 移动端遮罩 -->
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+  <!-- =============================================
+       侧边栏导航
+       ============================================= -->
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-title">场景导航</span>
+      <button id="sidebarToggle" class="sidebar-toggle" aria-label="收起侧边栏">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
+    </div>
+
+    <nav id="sidebarNav" class="sidebar-nav">
+      <div class="sidebar-nav-label">决策场景</div>
+      <!-- 场景项由 JS 动态生成 -->
+    </nav>
+
+    <div class="sidebar-footer">
+      <span>随机决策转盘 v2.0</span>
+    </div>
+  </aside>
+
+  <!-- 主内容区 -->
+  <div class="main-content">
+    <div class="container">
+      <header class="header">
+        <h1 id="themeTitle"></h1>
+        <p>让选择变得简单有趣</p>
+      </header>
+
+      <section class="wheel-section">
+        <div class="wheel-container">
+          <div class="pointer"></div>
+          <canvas id="wheelCanvas"></canvas>
+        </div>
+
+        <button id="spinBtn" class="spin-btn">开始旋转</button>
+        <p id="hintText" class="hint-text"></p>
+      </section>
+
+      <section class="options-section">
+        <h2>选项管理</h2>
+        <div class="options-input-group">
+          <input type="text" id="optionInput" placeholder="输入新选项，按回车或点击添加..." maxlength="20">
+          <button id="addBtn" class="add-btn">添加选项</button>
+        </div>
+        <div id="optionsList" class="options-list"></div>
+      </section>
+    </div>
+  </div>
+
+  <!-- 结果弹窗 -->
+  <div id="modalOverlay" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-emoji" id="modalEmoji">🎉</div>
+      <h3>决定就是它了！</h3>
+      <p class="modal-result" id="modalResult"></p>
+      <button id="modalCloseBtn" class="modal-close-btn">好的，就选这个</button>
+    </div>
+  </div>
+
+  <!-- 粒子效果容器 -->
+  <div id="particlesContainer" class="particles-container"></div>
+
+  <script>
+    /**
+     * =============================================
+     * 【开发者注意】后续开发新转盘场景时，仅需修改 SCENES 配置数组即可
+     * =============================================
+     * 
+     * 每个场景包含以下字段：
+     * - id: 场景唯一标识符（英文字符串）
+     * - icon: 场景图标 emoji
+     * - themeName: 转盘主题名称，显示在页面顶部标题
+     * - defaultOptions: 默认选项数组，每个元素代表一个扇区
+     * - colors: 配色方案数组，用于交替渲染扇区颜色
+     * - spinDuration: 旋转总时长（毫秒）
+     * - canvasSize: 转盘 Canvas 逻辑尺寸（像素）
+     * 
+     * 新增场景只需在 SCENES 数组中添加一个新对象！
+     * =============================================
+     */
+    const SCENES = [
+      {
+        id: 'food',
+        icon: '🍽️',
+        themeName: '今天吃什么',
+        defaultOptions: ['火锅', '烧烤', '日料', '披萨', '麻辣烫', '快餐', '中餐', '沙拉'],
+        colors: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE', '#82E0AA'],
+        spinDuration: 5000,
+        canvasSize: 450
+      },
+      {
+        id: 'exercise',
+        icon: '🏃',
+        themeName: '今天做什么运动',
+        defaultOptions: ['跑步', '游泳', '瑜伽', '骑行', '跳绳', '举重', '打篮球', '打羽毛球'],
+        colors: ['#FF6348', '#7BED9F', '#70A1FF', '#FFA502', '#2ED573', '#1E90FF', '#FF4757', '#5352ED'],
+        spinDuration: 5000,
+        canvasSize: 450
+      },
+      {
+        id: 'weekend',
+        icon: '🎡',
+        themeName: '周末去哪玩',
+        defaultOptions: ['爬山', '海边', '公园', '博物馆', '游乐园', '古镇', '露营', '电影院'],
+        colors: ['#A29BFE', '#FD79A8', '#FDCB6E', '#00CEC9', '#E17055', '#6C5CE7', '#00B894', '#FAB1A0'],
+        spinDuration: 5000,
+        canvasSize: 450
+      },
+      {
+        id: 'party',
+        icon: '🎉',
+        themeName: '聚会玩什么',
+        defaultOptions: ['桌游', 'KTV', '密室逃脱', '剧本杀', '狼人杀', '真心话大冒险', '打牌', '电竞赛'],
+        colors: ['#FF9FF3', '#FECA57', '#FF6B6B', '#48DBFB', '#FF9FF3', '#54A0FF', '#5F27CD', '#01A3A4'],
+        spinDuration: 5000,
+        canvasSize: 450
+      }
+    ];
+
+    /**
+     * 当前场景配置 - 运行时从 SCENES 中读取
+     * 所有业务逻辑读取 APP_CONFIG 而非直接读取 SCENES
+     */
+    let APP_CONFIG = { ...SCENES[0], colors: [...SCENES[0].colors], defaultOptions: [...SCENES[0].defaultOptions] };
+
+    /**
+     * 当前场景索引，用于侧边栏高亮
+     */
+    let currentSceneIndex = 0;
+
+    const state = {
+      isSpinning: false,
+      currentRotation: 0,
+      options: [...APP_CONFIG.defaultOptions]
+    };
+
+    const dom = {
+      canvas: document.getElementById('wheelCanvas'),
+      ctx: null,
+      spinBtn: document.getElementById('spinBtn'),
+      hint: document.getElementById('hintText'),
+      optionInput: document.getElementById('optionInput'),
+      addBtn: document.getElementById('addBtn'),
+      optionsList: document.getElementById('optionsList'),
+      themeTitle: document.getElementById('themeTitle'),
+      modalOverlay: document.getElementById('modalOverlay'),
+      modalResult: document.getElementById('modalResult'),
+      modalCloseBtn: document.getElementById('modalCloseBtn'),
+      modalEmoji: document.getElementById('modalEmoji'),
+      particles: document.getElementById('particlesContainer'),
+      sidebar: document.getElementById('sidebar'),
+      sidebarToggle: document.getElementById('sidebarToggle'),
+      sidebarNav: document.getElementById('sidebarNav'),
+      mobileMenuBtn: document.getElementById('mobileMenuBtn'),
+      sidebarOverlay: document.getElementById('sidebarOverlay')
+    };
+
+    const dpr = window.devicePixelRatio || 1;
+
+    /**
+     * 初始化 DOM 引用
+     * 使用 devicePixelRatio 提升 Canvas 渲染分辨率，确保文字清晰
+     */
+    function initDOM() {
+      dom.ctx = dom.canvas.getContext('2d');
+      dom.themeTitle.textContent = APP_CONFIG.themeName;
+
+      const logicalSize = APP_CONFIG.canvasSize;
+      const physicalSize = Math.round(logicalSize * dpr);
+
+      dom.canvas.width = physicalSize;
+      dom.canvas.height = physicalSize;
+      dom.canvas.style.width = logicalSize + 'px';
+      dom.canvas.style.height = logicalSize + 'px';
+
+      dom.ctx.scale(dpr, dpr);
+
+      updateUI();
+    }
+
+    /**
+     * 绘制转盘
+     * 所有坐标使用逻辑像素（logical pixels），由 ctx.scale(dpr) 自动映射到物理像素
+     */
+    function drawWheel(options, colors, rotation = 0) {
+      const ctx = dom.ctx;
+      const size = APP_CONFIG.canvasSize;
+      const centerX = size / 2;
+      const centerY = size / 2;
+      const radius = size / 2 - 30;
+
+      ctx.clearRect(0, 0, size, size);
+      ctx.save();
+      ctx.translate(centerX, centerY);
+      ctx.rotate(rotation);
+
+      const arcAngle = (2 * Math.PI) / options.length;
+
+      // 外圈装饰底环
+      ctx.beginPath();
+      ctx.arc(0, 0, radius + 15, 0, 2 * Math.PI);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+      ctx.fill();
+
+      // 外圈装饰小圆点
+      const dotCount = options.length * 3;
+      for (let i = 0; i < dotCount; i++) {
+        const angle = (i / dotCount) * 2 * Math.PI;
+        const dotX = Math.cos(angle) * (radius + 15);
+        const dotY = Math.sin(angle) * (radius + 15);
+
+        ctx.beginPath();
+        ctx.arc(dotX, dotY, 3, 0, 2 * Math.PI);
+        ctx.fillStyle = i % 2 === 0 ? 'rgba(255, 255, 255, 0.4)' : colors[i % colors.length];
+        ctx.fill();
+      }
+
+      // 外圈光环
+      ctx.beginPath();
+      ctx.arc(0, 0, radius + 10, 0, 2 * Math.PI);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.lineWidth = 4;
+      ctx.stroke();
+
+      options.forEach((option, index) => {
+        const startAngle = index * arcAngle;
+        const endAngle = startAngle + arcAngle;
+        const color = colors[index % colors.length];
+
+        // 扇区径向渐变
+        const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, radius);
+        gradient.addColorStop(0, lightenColor(color, 30));
+        gradient.addColorStop(1, color);
+
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.arc(0, 0, radius, startAngle, endAngle);
+        ctx.closePath();
+        ctx.fillStyle = gradient;
+        ctx.fill();
+
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // 文字 - 使用逻辑像素，由 devicePixelRatio 缩放保证清晰
+        ctx.save();
+        ctx.rotate(startAngle + arcAngle / 2);
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#fff';
+
+        const fontSize = options.length <= 6 ? 16 : options.length <= 12 ? 14 : 12;
+        ctx.font = `bold ${fontSize}px "Noto Sans SC", sans-serif`;
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+        ctx.shadowBlur = 4;
+
+        const textX = radius * 0.65;
+        ctx.fillText(option, textX, 0);
+        ctx.restore();
+      });
+
+      // 中心圆装饰
+      ctx.beginPath();
+      ctx.arc(0, 0, 28, 0, 2 * Math.PI);
+      ctx.fillStyle = '#fff';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(0, 0, 22, 0, 2 * Math.PI);
+      ctx.fillStyle = APP_CONFIG.colors[0];
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function lightenColor(hex, percent) {
+      const num = parseInt(hex.replace('#', ''), 16);
+      const r = Math.min(255, (num >> 16) + Math.round(255 * percent / 100));
+      const g = Math.min(255, ((num & 0x0000FF) >> 8) + Math.round(255 * percent / 100));
+      const b = Math.min(255, (num & 0x0000FF) + Math.round(255 * percent / 100));
+      return `rgb(${r}, ${g}, ${b})`;
+    }
+
+    /**
+     * 物理缓动动画控制器
+     * 使用 easeOutQuart 缓动曲线：f(t) = 1 - (1-t)^4
+     * 特性：
+     *   - f(0) = 0, f(1) = 1
+     *   - f'(t) = 4(1-t)^3，f'(1) = 0 => 终点速度为 0，绝无反弹
+     *   - 单调递减的速度曲线，模拟摩擦力越来越大
+     */
+    function spinAnimation(duration, onUpdate, onComplete) {
+      const startTime = performance.now();
+
+      const sectorCount = state.options.length;
+      const sectorAngle = (2 * Math.PI) / sectorCount;
+
+      const currentBaseAngle = state.currentRotation;
+      const targetIndex = Math.floor(Math.random() * sectorCount);
+      const targetSectorCenter = targetIndex * sectorAngle + sectorAngle / 2;
+
+      const desiredFinalAngle = (Math.PI * 1.5 - targetSectorCenter);
+      const randomOffset = (Math.random() - 0.5) * sectorAngle * 0.6;
+      const desiredFinalAngleWithOffset = desiredFinalAngle + randomOffset;
+
+      let delta = (desiredFinalAngleWithOffset - currentBaseAngle) % (2 * Math.PI);
+      if (delta < 0) delta += 2 * Math.PI;
+
+      const fullRotations = (8 + Math.floor(Math.random() * 5)) * 2 * Math.PI;
+      const totalDelta = fullRotations + delta;
+      const finalAngle = currentBaseAngle + totalDelta;
+
+      let lastSectorIndex = -1;
+
+      function easeOutQuart(t) {
+        return 1 - Math.pow(1 - t, 4);
+      }
+
+      function updatePointerTick(currentAngle) {
+        const normalizedAngle = ((currentAngle % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+        const currentSectorIndex = Math.floor(normalizedAngle / sectorAngle);
+        if (currentSectorIndex !== lastSectorIndex) {
+          lastSectorIndex = currentSectorIndex;
+
+          const pointer = document.querySelector('.pointer');
+          if (pointer) {
+            pointer.style.transform = 'translateX(-50%) translateY(-4px)';
+            setTimeout(() => {
+              pointer.style.transform = 'translateX(-50%) translateY(0)';
+            }, 80);
+          }
+        }
+      }
+
+      function animate(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+
+        const easedProgress = easeOutQuart(progress);
+        const currentAngle = currentBaseAngle + totalDelta * easedProgress;
+
+        onUpdate(currentAngle);
+        updatePointerTick(currentAngle);
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          const normalizedFinal = ((finalAngle % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+          state.currentRotation = normalizedFinal;
+          onComplete({ index: targetIndex, rotation: normalizedFinal });
+        }
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    /**
+     * 更新 CSS 变量，实现一键换肤
+     * 将当前场景的配色同步到 :root CSS 变量
+     */
+    function updateCSSVariables(colors) {
+      const root = document.documentElement.style;
+      if (colors && colors.length >= 3) {
+        root.setProperty('--primary-color', colors[0]);
+        root.setProperty('--secondary-color', colors[1]);
+        root.setProperty('--accent-color', colors[2]);
+      }
+    }
+
+    /**
+     * 切换场景
+     * 读取新场景配置，重置转盘状态，更新所有 UI
+     * @param {Number} sceneIndex - 目标场景在 SCENES 数组中的索引
+     */
+    function switchScene(sceneIndex) {
+      if (sceneIndex === currentSceneIndex || state.isSpinning) return;
+
+      const newScene = SCENES[sceneIndex];
+      if (!newScene) return;
+
+      currentSceneIndex = sceneIndex;
+
+      // 深拷贝场景配置，避免修改原始模板
+      APP_CONFIG = {
+        ...newScene,
+        colors: [...newScene.colors],
+        defaultOptions: [...newScene.defaultOptions]
+      };
+
+      // 更新运行时状态
+      state.options = [...APP_CONFIG.defaultOptions];
+      state.currentRotation = 0;
+      state.isSpinning = false;
+
+      // 更新 CSS 变量（换肤）
+      updateCSSVariables(APP_CONFIG.colors);
+
+      // 更新标题
+      dom.themeTitle.textContent = APP_CONFIG.themeName;
+      dom.themeTitle.classList.remove('scene-transition');
+      void dom.themeTitle.offsetWidth; // 强制回流触发动画
+      dom.themeTitle.classList.add('scene-transition');
+
+      // 重新设置 Canvas 内部渲染分辨率（物理像素）
+      const logicalSize = APP_CONFIG.canvasSize;
+      const physicalSize = Math.round(logicalSize * dpr);
+      dom.canvas.width = physicalSize;
+      dom.canvas.height = physicalSize;
+
+      // 关键修复：设置 canvas.width/height 会重置整个 2D 上下文
+      // 包括之前 ctx.scale(dpr, dpr) 的高清缩放也会丢失，必须重新设置
+      dom.ctx.scale(dpr, dpr);
+
+      // 清空输入框
+      dom.optionInput.value = '';
+      dom.optionInput.placeholder = '输入新选项，按回车或点击添加...';
+
+      // 重绘转盘和 UI
+      drawWheel(state.options, APP_CONFIG.colors, 0);
+      updateUI();
+
+      // 更新侧边栏高亮
+      renderSidebarItems();
+
+      // 移动端切换后自动收起
+      if (window.innerWidth <= 768) {
+        closeMobileSidebar();
+      }
+    }
+
+    function updateUI() {
+      const count = state.options.length;
+
+      if (state.isSpinning) {
+        dom.spinBtn.disabled = true;
+        dom.spinBtn.classList.add('spinning');
+        dom.hint.textContent = '旋转中...';
+        dom.hint.classList.remove('warning');
+      } else {
+        dom.spinBtn.classList.remove('spinning');
+
+        if (count < 2) {
+          dom.spinBtn.disabled = true;
+          dom.hint.textContent = '⚠️ 至少需要 2 个选项才能旋转';
+          dom.hint.classList.add('warning');
+        } else {
+          dom.spinBtn.disabled = false;
+          dom.hint.textContent = `当前共有 ${count} 个选项，点击按钮开始决定吧！`;
+          dom.hint.classList.remove('warning');
+        }
+      }
+
+      renderOptionsList();
+    }
+
+    function renderOptionsList() {
+      dom.optionsList.innerHTML = '';
+
+      state.options.forEach((option, index) => {
+        const item = document.createElement('div');
+        item.className = 'option-item';
+        item.innerHTML = `
+          <span>${option}</span>
+          <button class="remove-btn" data-index="${index}">×</button>
+        `;
+        dom.optionsList.appendChild(item);
+      });
+    }
+
+    /**
+     * 渲染侧边栏场景列表
+     */
+    function renderSidebarItems() {
+      dom.sidebarNav.innerHTML = '<div class="sidebar-nav-label">决策场景</div>';
+
+      SCENES.forEach((scene, index) => {
+        const item = document.createElement('div');
+        item.className = `sidebar-item${index === currentSceneIndex ? ' active' : ''}`;
+        item.dataset.index = index;
+        item.innerHTML = `
+          <span class="sidebar-item-icon">${scene.icon}</span>
+          <span class="sidebar-item-text">${scene.themeName}</span>
+          <span class="sidebar-item-count">${scene.defaultOptions.length}项</span>
+        `;
+        item.addEventListener('click', () => switchScene(index));
+        dom.sidebarNav.appendChild(item);
+      });
+    }
+
+    /**
+     * 侧边栏展开/收起（桌面端）
+     */
+    function toggleSidebar() {
+      dom.sidebar.classList.toggle('collapsed');
+    }
+
+    /**
+     * 移动端打开侧边栏
+     */
+    function openMobileSidebar() {
+      dom.sidebar.classList.add('mobile-open');
+      dom.sidebarOverlay.classList.add('active');
+    }
+
+    /**
+     * 移动端关闭侧边栏
+     */
+    function closeMobileSidebar() {
+      dom.sidebar.classList.remove('mobile-open');
+      dom.sidebarOverlay.classList.remove('active');
+    }
+
+    function showResultModal(result) {
+      dom.modalResult.textContent = result;
+
+      const emojis = ['🎉', '🎊', '✨', '🌟', '💫'];
+      dom.modalEmoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+
+      dom.modalOverlay.classList.add('active');
+      createParticles();
+    }
+
+    function createParticles() {
+      dom.particles.innerHTML = '';
+      const colors = APP_CONFIG.colors;
+      const particleCount = 50;
+
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.top = '-20px';
+        particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        particle.style.width = (Math.random() * 12 + 6) + 'px';
+        particle.style.height = particle.style.width;
+        particle.style.animationDuration = (Math.random() * 2 + 2) + 's';
+        particle.style.animationDelay = (Math.random() * 1) + 's';
+        dom.particles.appendChild(particle);
+      }
+
+      setTimeout(() => {
+        dom.particles.innerHTML = '';
+      }, 4000);
+    }
+
+    function handleSpin() {
+      if (state.isSpinning || state.options.length < 2) return;
+
+      state.isSpinning = true;
+      updateUI();
+
+      document.querySelector('.wheel-container').classList.add('spinning');
+
+      spinAnimation(APP_CONFIG.spinDuration,
+        (currentAngle) => {
+          drawWheel(state.options, APP_CONFIG.colors, currentAngle);
+        },
+        ({ index: targetIndex, rotation: targetRotation }) => {
+          document.querySelector('.wheel-container').classList.remove('spinning');
+
+          const result = {
+            index: targetIndex,
+            value: state.options[targetIndex]
+          };
+          state.isSpinning = false;
+          state.currentRotation = targetRotation;
+
+          setTimeout(() => {
+            showResultModal(result.value);
+            updateUI();
+          }, 300);
+        }
+      );
+    }
+
+    function handleAddOption() {
+      const value = dom.optionInput.value.trim();
+
+      if (!value) return;
+      if (state.options.includes(value)) {
+        dom.optionInput.value = '';
+        dom.optionInput.placeholder = '该选项已存在，请输入新选项...';
+        setTimeout(() => {
+          dom.optionInput.placeholder = '输入新选项，按回车或点击添加...';
+        }, 2000);
+        return;
+      }
+
+      state.options.push(value);
+      APP_CONFIG.defaultOptions = [...state.options];
+      // 同步更新 SCENES 中对应场景的选项
+      SCENES[currentSceneIndex].defaultOptions = [...state.options];
+      dom.optionInput.value = '';
+
+      drawWheel(state.options, APP_CONFIG.colors, state.currentRotation);
+      updateUI();
+      renderSidebarItems(); // 更新侧边栏计数
+    }
+
+    function handleRemoveOption(index) {
+      if (state.isSpinning) return;
+
+      state.options.splice(index, 1);
+      APP_CONFIG.defaultOptions = [...state.options];
+      SCENES[currentSceneIndex].defaultOptions = [...state.options];
+
+      drawWheel(state.options, APP_CONFIG.colors, state.currentRotation);
+      updateUI();
+      renderSidebarItems();
+    }
+
+    function handleCloseModal() {
+      dom.modalOverlay.classList.remove('active');
+    }
+
+    function initEvents() {
+      dom.spinBtn.addEventListener('click', handleSpin);
+
+      dom.addBtn.addEventListener('click', handleAddOption);
+
+      dom.optionInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          handleAddOption();
+        }
+      });
+
+      dom.optionsList.addEventListener('click', (e) => {
+        if (e.target.classList.contains('remove-btn')) {
+          const index = parseInt(e.target.dataset.index);
+          handleRemoveOption(index);
+        }
+      });
+
+      dom.modalCloseBtn.addEventListener('click', handleCloseModal);
+
+      dom.modalOverlay.addEventListener('click', (e) => {
+        if (e.target === dom.modalOverlay) {
+          handleCloseModal();
+        }
+      });
+
+      // 侧边栏展开/收起
+      dom.sidebarToggle.addEventListener('click', toggleSidebar);
+
+      // 移动端汉堡菜单
+      dom.mobileMenuBtn.addEventListener('click', () => {
+        if (dom.sidebar.classList.contains('mobile-open')) {
+          closeMobileSidebar();
+        } else {
+          openMobileSidebar();
+        }
+      });
+
+      // 点击遮罩关闭移动端侧边栏
+      dom.sidebarOverlay.addEventListener('click', closeMobileSidebar);
+    }
+
+    function init() {
+      // 初始化配色
+      updateCSSVariables(APP_CONFIG.colors);
+
+      initDOM();
+      drawWheel(state.options, APP_CONFIG.colors, 0);
+      renderSidebarItems();
+      initEvents();
+    }
+
+    init();
+  </script>
+</body>
+</html>
