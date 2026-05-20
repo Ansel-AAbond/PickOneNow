@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,29 +7,126 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
+  <!-- 引入 SortableJS 轻量级拖拽排序库 -->
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js"></script>
   <style>
     /* =============================================
-       CSS 变量 - 由当前场景动态更新
+       主题系统 - CSS 变量定义
+       浅色模式为默认主题（无 data-theme 或 data-theme="light"）
+       深色模式通过 [data-theme="dark"] 覆盖变量值
        ============================================= */
+
+    /* ---------- 浅色模式（默认） ---------- */
     :root {
+      /* 场景配色（由 JS 动态更新） */
       --primary-color: #FF6B6B;
       --secondary-color: #4ECDC4;
       --accent-color: #FFE66D;
-      --bg-color: #1a1a2e;
-      --card-bg: #16213e;
-      --text-color: #ffffff;
-      --text-secondary: #a0a0b0;
-      --shadow-color: rgba(0, 0, 0, 0.3);
+
+      /* 基础背景 */
+      --bg-color: #f0f2f5;
+      --bg-gradient-1: rgba(255, 107, 107, 0.08);
+      --bg-gradient-2: rgba(78, 205, 196, 0.06);
+      --bg-gradient-3: rgba(255, 230, 109, 0.05);
+
+      /* 卡片与容器 */
+      --card-bg: #ffffff;
+      --card-border: rgba(0, 0, 0, 0.06);
+
+      /* 文字 */
+      --text-color: #1a1a2e;
+      --text-secondary: #6b7280;
+      --text-muted: #9ca3af;
+
+      /* 阴影 */
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+      --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 24px 48px rgba(0, 0, 0, 0.12);
+
+      /* 边框圆角 */
       --border-radius: 24px;
+
+      /* 字体 */
       --font-display: 'ZCOOL XiaoWei', serif;
       --font-body: 'Noto Sans SC', sans-serif;
 
-      /* 侧边栏相关变量 */
+      /* 侧边栏 */
       --sidebar-width: 260px;
       --sidebar-collapsed-width: 60px;
-      --sidebar-bg: rgba(22, 33, 62, 0.95);
-      --sidebar-item-hover: rgba(255, 255, 255, 0.08);
-      --sidebar-item-active: rgba(255, 107, 107, 0.15);
+      --sidebar-bg: rgba(255, 255, 255, 0.9);
+      --sidebar-border: rgba(0, 0, 0, 0.06);
+      --sidebar-item-hover: rgba(0, 0, 0, 0.04);
+      --sidebar-item-active: rgba(255, 107, 107, 0.1);
+      --sidebar-badge-bg: rgba(0, 0, 0, 0.05);
+      --sidebar-toggle-bg: rgba(0, 0, 0, 0.06);
+
+      /* 按钮 */
+      --btn-spin-shadow: rgba(255, 107, 107, 0.3);
+      --btn-spin-hover-shadow: rgba(255, 107, 107, 0.4);
+      --btn-disabled-from: #9ca3af;
+      --btn-disabled-to: #d1d5db;
+
+      /* 输入框 */
+      --input-bg: rgba(0, 0, 0, 0.03);
+      --input-border: rgba(0, 0, 0, 0.08);
+      --input-border-focus: var(--secondary-color);
+      --input-focus-ring: rgba(78, 205, 196, 0.15);
+      --input-placeholder: var(--text-muted);
+
+      /* 选项标签 */
+      --tag-bg: rgba(0, 0, 0, 0.04);
+      --tag-hover-bg: rgba(0, 0, 0, 0.08);
+      --tag-remove-bg: rgba(255, 107, 107, 0.12);
+      --tag-remove-hover: var(--primary-color);
+
+      /* 弹窗 */
+      --modal-overlay-bg: rgba(0, 0, 0, 0.4);
+      --modal-shadow: 0 24px 48px rgba(0, 0, 0, 0.15);
+    }
+
+    /* ---------- 深色模式 ---------- */
+    [data-theme="dark"] {
+      --bg-color: #0f1117;
+      --bg-gradient-1: rgba(255, 107, 107, 0.12);
+      --bg-gradient-2: rgba(78, 205, 196, 0.08);
+      --bg-gradient-3: rgba(255, 230, 109, 0.06);
+
+      --card-bg: #1a1d28;
+      --card-border: rgba(255, 255, 255, 0.06);
+
+      --text-color: #e8eaed;
+      --text-secondary: #9aa0ab;
+      --text-muted: #6b7280;
+
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 24px 48px rgba(0, 0, 0, 0.5);
+
+      --sidebar-bg: rgba(15, 17, 23, 0.95);
+      --sidebar-border: rgba(255, 255, 255, 0.06);
+      --sidebar-item-hover: rgba(255, 255, 255, 0.06);
+      --sidebar-item-active: rgba(255, 107, 107, 0.12);
+      --sidebar-badge-bg: rgba(255, 255, 255, 0.06);
+      --sidebar-toggle-bg: rgba(255, 255, 255, 0.08);
+
+      --btn-spin-shadow: rgba(255, 107, 107, 0.4);
+      --btn-spin-hover-shadow: rgba(255, 107, 107, 0.5);
+      --btn-disabled-from: #4b5563;
+      --btn-disabled-to: #6b7280;
+
+      --input-bg: rgba(255, 255, 255, 0.04);
+      --input-border: rgba(255, 255, 255, 0.08);
+      --input-border-focus: var(--secondary-color);
+      --input-focus-ring: rgba(78, 205, 196, 0.2);
+      --input-placeholder: var(--text-secondary);
+
+      --tag-bg: rgba(255, 255, 255, 0.06);
+      --tag-hover-bg: rgba(255, 255, 255, 0.1);
+      --tag-remove-bg: rgba(255, 107, 107, 0.2);
+      --tag-remove-hover: var(--primary-color);
+
+      --modal-overlay-bg: rgba(0, 0, 0, 0.7);
+      --modal-shadow: 0 24px 48px rgba(0, 0, 0, 0.6);
     }
 
     * {
@@ -45,8 +142,10 @@
       min-height: 100vh;
       overflow-x: hidden;
       display: flex;
+      transition: background-color 0.4s ease, color 0.4s ease;
     }
 
+    /* 背景装饰光斑 */
     body::before {
       content: '';
       position: fixed;
@@ -55,9 +154,9 @@
       width: 100%;
       height: 100%;
       background: 
-        radial-gradient(ellipse at 20% 50%, rgba(255, 107, 107, 0.15) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 20%, rgba(78, 205, 196, 0.12) 0%, transparent 50%),
-        radial-gradient(ellipse at 50% 80%, rgba(255, 230, 109, 0.1) 0%, transparent 50%);
+        radial-gradient(ellipse at 20% 50%, var(--bg-gradient-1) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, var(--bg-gradient-2) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 80%, var(--bg-gradient-3) 0%, transparent 50%);
       pointer-events: none;
       z-index: 0;
     }
@@ -73,12 +172,12 @@
       height: 100vh;
       background: var(--sidebar-bg);
       backdrop-filter: blur(12px);
-      border-right: 1px solid rgba(255, 255, 255, 0.06);
+      border-right: 1px solid var(--sidebar-border);
       z-index: 100;
       display: flex;
       flex-direction: column;
-      transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1), transform 0.35s ease;
-      box-shadow: 4px 0 24px rgba(0, 0, 0, 0.2);
+      transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1), transform 0.35s ease, background-color 0.4s ease;
+      box-shadow: var(--shadow-sm);
       overflow: hidden;
     }
 
@@ -91,7 +190,7 @@
       align-items: center;
       justify-content: space-between;
       padding: 20px 16px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      border-bottom: 1px solid var(--sidebar-border);
       min-height: 64px;
     }
 
@@ -114,7 +213,7 @@
       width: 32px;
       height: 32px;
       border: none;
-      background: rgba(255, 255, 255, 0.08);
+      background: var(--sidebar-toggle-bg);
       border-radius: 8px;
       color: var(--text-color);
       cursor: pointer;
@@ -126,7 +225,7 @@
     }
 
     .sidebar-toggle:hover {
-      background: rgba(255, 255, 255, 0.15);
+      background: var(--sidebar-item-hover);
       transform: scale(1.1);
     }
 
@@ -209,6 +308,7 @@
       font-weight: 500;
       opacity: 1;
       transition: opacity 0.25s ease;
+      color: var(--text-color);
     }
 
     .sidebar.collapsed .sidebar-item-text {
@@ -220,7 +320,7 @@
       margin-left: auto;
       font-size: 0.75rem;
       color: var(--text-secondary);
-      background: rgba(255, 255, 255, 0.06);
+      background: var(--sidebar-badge-bg);
       padding: 2px 8px;
       border-radius: 10px;
       opacity: 1;
@@ -233,7 +333,7 @@
 
     .sidebar-footer {
       padding: 16px;
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      border-top: 1px solid var(--sidebar-border);
       text-align: center;
       font-size: 0.75rem;
       color: var(--text-secondary);
@@ -394,7 +494,7 @@
       font-size: 1.2rem;
       cursor: pointer;
       box-shadow: 
-        0 8px 24px rgba(255, 107, 107, 0.4),
+        0 8px 24px var(--btn-spin-shadow),
         0 4px 12px rgba(0, 0, 0, 0.3);
       transition: all 0.3s ease;
       position: relative;
@@ -417,13 +517,13 @@
     .spin-btn:hover:not(:disabled) {
       transform: scale(1.08);
       box-shadow: 
-        0 12px 32px rgba(255, 107, 107, 0.5),
+        0 12px 32px var(--btn-spin-hover-shadow),
         0 6px 16px rgba(0, 0, 0, 0.4);
     }
     .spin-btn:active:not(:disabled) { transform: scale(0.98); }
 
     .spin-btn:disabled {
-      background: linear-gradient(135deg, #666, #888);
+      background: linear-gradient(135deg, var(--btn-disabled-from), var(--btn-disabled-to));
       cursor: not-allowed;
       box-shadow: none;
       opacity: 0.7;
@@ -446,8 +546,10 @@
       background: var(--card-bg);
       border-radius: var(--border-radius);
       padding: 32px;
-      box-shadow: 0 8px 32px var(--shadow-color);
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--card-border);
       animation: fadeInUp 0.8s ease-out 0.2s both;
+      transition: background-color 0.4s ease, border-color 0.4s ease;
     }
 
     .options-section h2 {
@@ -466,21 +568,21 @@
     .options-input-group input {
       flex: 1;
       padding: 14px 18px;
-      border: 2px solid rgba(255, 255, 255, 0.1);
+      border: 2px solid var(--input-border);
       border-radius: 12px;
-      background: rgba(255, 255, 255, 0.05);
+      background: var(--input-bg);
       color: var(--text-color);
       font-family: var(--font-body);
       font-size: 1rem;
       transition: all 0.3s ease;
     }
 
-    .options-input-group input::placeholder { color: var(--text-secondary); }
+    .options-input-group input::placeholder { color: var(--input-placeholder); }
     .options-input-group input:focus {
       outline: none;
-      border-color: var(--secondary-color);
+      border-color: var(--input-border-focus);
       background: rgba(255, 255, 255, 0.08);
-      box-shadow: 0 0 0 4px rgba(78, 205, 196, 0.2);
+      box-shadow: 0 0 0 4px var(--input-focus-ring);
     }
 
     .add-btn {
@@ -512,29 +614,68 @@
     }
 
     .options-list::-webkit-scrollbar { width: 6px; }
-    .options-list::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 3px; }
-    .options-list::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 3px; }
+    .options-list::-webkit-scrollbar-track { background: var(--tag-bg); border-radius: 3px; }
+    .options-list::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 3px; }
 
     .option-item {
       display: inline-flex;
       align-items: center;
       gap: 8px;
       padding: 10px 16px;
-      background: rgba(255, 255, 255, 0.08);
+      background: var(--tag-bg);
       border-radius: 20px;
       font-size: 0.95rem;
+      color: var(--text-color);
       animation: scaleIn 0.3s ease-out;
       transition: all 0.2s ease;
+      cursor: default;
     }
 
-    .option-item:hover { background: rgba(255, 255, 255, 0.12); }
+    .option-item:hover { background: var(--tag-hover-bg); }
+
+    /* 拖拽手柄样式 */
+    .drag-handle {
+      cursor: grab;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .drag-handle:hover {
+      color: var(--text-color);
+      background: var(--sidebar-toggle-bg);
+    }
+
+    .drag-handle:active {
+      cursor: grabbing;
+    }
+
+    /* SortableJS 拖拽中的样式 */
+    .sortable-ghost {
+      opacity: 0.4;
+      background: var(--tag-hover-bg);
+    }
+
+    .sortable-chosen {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .sortable-drag {
+      opacity: 0.9;
+    }
 
     .option-item .remove-btn {
       width: 20px;
       height: 20px;
       border-radius: 50%;
       border: none;
-      background: rgba(255, 107, 107, 0.3);
+      background: var(--tag-remove-bg);
       color: var(--primary-color);
       font-size: 0.8rem;
       cursor: pointer;
@@ -545,7 +686,7 @@
     }
 
     .option-item .remove-btn:hover {
-      background: var(--primary-color);
+      background: var(--tag-remove-hover);
       color: white;
       transform: scale(1.15);
     }
@@ -556,7 +697,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.7);
+      background: var(--modal-overlay-bg);
       backdrop-filter: blur(8px);
       display: flex;
       align-items: center;
@@ -580,10 +721,11 @@
       width: 90%;
       text-align: center;
       transform: scale(0.8) translateY(30px);
-      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.4s ease;
+      box-shadow: var(--modal-shadow);
       position: relative;
       overflow: hidden;
+      border: 1px solid var(--card-border);
     }
 
     .modal-overlay.active .modal {
@@ -661,6 +803,86 @@
       animation: particleFall linear forwards;
     }
 
+    /* =============================================
+       主题切换按钮
+       固定在页面右上角，悬浮在内容之上
+       ============================================= */
+    .theme-toggle {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 101;
+      width: 44px;
+      height: 44px;
+      border: none;
+      border-radius: 12px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-color);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s ease;
+    }
+
+    .theme-toggle:hover {
+      transform: scale(1.1);
+      box-shadow: var(--shadow-md);
+    }
+
+    .theme-toggle svg {
+      width: 20px;
+      height: 20px;
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* 主题切换时图标旋转动画 */
+    .theme-toggle.switching svg {
+      transform: rotate(360deg);
+    }
+
+    /* =============================================
+       静音控制按钮样式
+       与主题切换按钮保持一致的位置和样式
+       ============================================= */
+    .mute-toggle {
+      position: fixed;
+      top: 16px;
+      right: 68px;
+      z-index: 101;
+      width: 44px;
+      height: 44px;
+      border: none;
+      border-radius: 12px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-color);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s ease;
+    }
+
+    .mute-toggle:hover {
+      transform: scale(1.1);
+      box-shadow: var(--shadow-md);
+    }
+
+    .mute-toggle svg {
+      width: 20px;
+      height: 20px;
+      transition: transform 0.3s ease;
+    }
+
+    /* 静音状态：图标变灰 */
+    .mute-toggle.muted {
+      color: var(--text-muted);
+    }
+
     /* 场景切换时的淡入动画 */
     .scene-transition {
       animation: sceneFadeIn 0.5s ease-out;
@@ -725,11 +947,12 @@
       border: none;
       border-radius: 12px;
       background: var(--card-bg);
+      border: 1px solid var(--card-border);
       color: var(--text-color);
       cursor: pointer;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      box-shadow: var(--shadow-sm);
     }
 
     .mobile-menu-btn svg {
@@ -783,6 +1006,11 @@
         display: flex;
       }
 
+      .theme-toggle {
+        right: 16px;
+        top: 16px;
+      }
+
       .container {
         padding: 70px 16px 24px;
       }
@@ -798,6 +1026,32 @@
   </style>
 </head>
 <body>
+
+  <!-- =============================================
+       主题切换按钮
+       浅色模式显示月亮图标（提示可切换为深色）
+       深色模式显示太阳图标（提示可切换为浅色）
+       ============================================= -->
+  <button id="themeToggle" class="theme-toggle" aria-label="切换主题">
+    <!-- 默认显示月亮图标（当前为深色模式时的太阳图标会通过 JS 动态切换） -->
+    <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+    </svg>
+  </button>
+
+  <!-- =============================================
+       静音控制按钮
+       放在主题切换按钮旁边，用于全局音效开关
+       默认开启音效（喇叭图标），点击后切换为静音（静音喇叭图标）
+       ============================================= -->
+  <button id="muteToggle" class="mute-toggle" aria-label="切换静音模式">
+    <!-- 默认显示喇叭图标（音效开启状态） -->
+    <svg id="muteIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+      <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+      <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+    </svg>
+  </button>
 
   <!-- 移动端汉堡菜单按钮 -->
   <button id="mobileMenuBtn" class="mobile-menu-btn" aria-label="打开菜单">
@@ -866,7 +1120,7 @@
   <!-- 结果弹窗 -->
   <div id="modalOverlay" class="modal-overlay">
     <div class="modal">
-      <div class="modal-emoji" id="modalEmoji">🎉</div>
+      <div class="modal-emoji" id="modalEmoji"></div>
       <h3>决定就是它了！</h3>
       <p class="modal-result" id="modalResult"></p>
       <button id="modalCloseBtn" class="modal-close-btn">好的，就选这个</button>
@@ -877,6 +1131,300 @@
   <div id="particlesContainer" class="particles-container"></div>
 
   <script>
+    /**
+     * =============================================
+     * 主题切换模块
+     * 负责深色/浅色模式的切换、持久化和系统偏好检测
+     * =============================================
+     */
+
+    /**
+     * SVG 图标定义
+     * moon: 月亮图标，用于浅色模式按钮（提示可切换为深色）
+     * sun: 太阳图标，用于深色模式按钮（提示可切换为浅色）
+     */
+    const THEME_ICONS = {
+      moon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>`,
+      sun: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="5"></circle>
+        <line x1="12" y1="1" x2="12" y2="3"></line>
+        <line x1="12" y1="21" x2="12" y2="23"></line>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+        <line x1="1" y1="12" x2="3" y2="12"></line>
+        <line x1="21" y1="12" x2="23" y2="12"></line>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+      </svg>`
+    };
+
+    /**
+     * localStorage 键名
+     * 用于保存用户的主题偏好
+     */
+    const THEME_STORAGE_KEY = 'wheel-theme-preference';
+
+    /**
+     * 初始化主题
+     * 优先级：用户保存的偏好 > 系统偏好 > 默认深色
+     * 1. 先检查 localStorage 中是否有用户手动设置过的主题
+     * 2. 如果没有，检测系统是否偏好深色模式（prefers-color-scheme）
+     * 3. 如果系统也不支持深色模式检测，默认使用深色模式
+     */
+    function initTheme() {
+      const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+
+      if (savedTheme === 'light' || savedTheme === 'dark') {
+        applyTheme(savedTheme, false);
+      } else {
+        // 检测系统偏好
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        applyTheme(prefersDark ? 'dark' : 'light', false);
+      }
+
+      // 监听系统主题变化（用户修改了操作系统主题）
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        // 仅当用户没有手动设置过主题时才跟随系统
+        if (!localStorage.getItem(THEME_STORAGE_KEY)) {
+          applyTheme(e.matches ? 'dark' : 'light', false);
+        }
+      });
+    }
+
+    /**
+     * 应用主题
+     * @param {String} theme - 'light' 或 'dark'
+     * @param {Boolean} animate - 是否播放切换动画（用户主动点击时播放）
+     */
+    function applyTheme(theme, animate = true) {
+      const html = document.documentElement;
+      html.setAttribute('data-theme', theme);
+
+      // 更新按钮图标
+      const iconEl = document.getElementById('themeIcon');
+      iconEl.innerHTML = theme === 'dark' ? THEME_ICONS.sun : THEME_ICONS.moon;
+      iconEl.setAttribute('aria-label', theme === 'dark' ? '切换到浅色模式' : '切换到深色模式');
+
+      // 添加切换动画
+      if (animate) {
+        const btn = document.getElementById('themeToggle');
+        btn.classList.add('switching');
+        setTimeout(() => btn.classList.remove('switching'), 500);
+      }
+
+      // 保存用户偏好
+      localStorage.setItem(THEME_STORAGE_KEY, theme);
+    }
+
+    /**
+     * 切换主题（用户点击按钮时调用）
+     */
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      applyTheme(newTheme, true);
+    }
+
+    /**
+     * =============================================
+     * 音效反馈系统模块
+     * 使用 Web Audio API 生成音效，无需外部音频文件
+     * 功能包括：
+     *   1. 指针划过扇区边界时的"咔嗒"声（动态频率控制）
+     *   2. 结果揭晓时的庆祝音效
+     *   3. 全局静音/取消静音控制
+     * =============================================
+     */
+
+    /**
+     * 静音状态管理
+     * 默认开启音效（false = 未静音）
+     * 用户偏好保存至 localStorage
+     */
+    const MUTE_STORAGE_KEY = 'wheel-mute-preference';
+    let isMuted = false;
+
+    /**
+     * Web Audio API 音频上下文
+     * 延迟初始化，用户首次交互时创建（浏览器要求）
+     */
+    let audioCtx = null;
+
+    /**
+     * 初始化静音状态
+     * 读取用户上次保存的偏好
+     */
+    function initMuteState() {
+      const savedMute = localStorage.getItem(MUTE_STORAGE_KEY);
+      isMuted = savedMute === 'true';
+      updateMuteIcon();
+    }
+
+    /**
+     * 获取或创建音频上下文
+     * 浏览器要求：音频上下文必须在用户交互后才能创建
+     */
+    function getAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      // 如果音频上下文被挂起，恢复它
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    /**
+     * 播放"咔嗒"声
+     * 使用 Web Audio API 的振荡器生成短促的机械咔嗒声
+     * 特点：频率高（800Hz）、音量低、持续时间极短（50ms）
+     * 模拟真实转盘指针划过金属齿轮的声音
+     */
+    function playTickSound() {
+      if (isMuted) return; // 静音状态下不播放
+
+      try {
+        const ctx = getAudioContext();
+
+        // 创建振荡器（声音源）
+        const oscillator = ctx.createOscillator();
+        oscillator.type = 'square'; // 方波，产生机械感更强的咔嗒声
+        oscillator.frequency.setValueAtTime(800, ctx.currentTime); // 800Hz 高频
+
+        // 创建增益节点（音量控制）
+        const gainNode = ctx.createGain();
+        gainNode.gain.setValueAtTime(0.08, ctx.currentTime); // 低音量
+        gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05); // 50ms 快速衰减
+
+        // 连接节点：振荡器 → 增益 → 输出
+        oscillator.connect(gainNode);
+        gainNode.connect(ctx.destination);
+
+        // 播放声音
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + 0.05); // 50ms 后停止
+      } catch (e) {
+        // 忽略音频错误（如浏览器不支持）
+        console.warn('Audio tick error:', e);
+      }
+    }
+
+    /**
+     * 播放庆祝音效
+     * 使用多个振荡器叠加产生欢快的"叮叮叮"音效
+     * 音阶从低到高，营造愉悦感
+     */
+    function playCelebrationSound() {
+      if (isMuted) return;
+
+      try {
+        const ctx = getAudioContext();
+
+        // 播放三个不同频率的音符（C大调和弦：C-E-G）
+        const notes = [523.25, 659.25, 783.99]; // C5, E5, G5
+
+        notes.forEach((freq, index) => {
+          setTimeout(() => {
+            const oscillator = ctx.createOscillator();
+            oscillator.type = 'sine'; // 正弦波，声音柔和
+            oscillator.frequency.setValueAtTime(freq, ctx.currentTime);
+
+            const gainNode = ctx.createGain();
+            gainNode.gain.setValueAtTime(0.15, ctx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+
+            oscillator.connect(gainNode);
+            gainNode.connect(ctx.destination);
+
+            oscillator.start(ctx.currentTime);
+            oscillator.stop(ctx.currentTime + 0.3);
+          }, index * 100); // 每个音符间隔 100ms
+        });
+      } catch (e) {
+        console.warn('Audio celebration error:', e);
+      }
+    }
+
+    /**
+     * 切换静音状态
+     * 用户点击静音按钮时调用
+     */
+    function toggleMute() {
+      isMuted = !isMuted;
+      localStorage.setItem(MUTE_STORAGE_KEY, isMuted);
+      updateMuteIcon();
+
+      // 如果取消静音，尝试创建音频上下文（需要用户交互）
+      if (!isMuted) {
+        try {
+          getAudioContext();
+        } catch (e) {
+          console.warn('Failed to create audio context:', e);
+        }
+      }
+    }
+
+    /**
+     * 更新静音按钮图标
+     * 静音状态：显示静音喇叭图标（带斜杠）
+     * 非静音状态：显示正常喇叭图标
+     */
+    function updateMuteIcon() {
+      const iconEl = document.getElementById('muteIcon');
+      const btnEl = document.getElementById('muteToggle');
+
+      if (isMuted) {
+        // 静音图标
+        iconEl.innerHTML = `
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+          <line x1="23" y1="9" x2="17" y2="15"></line>
+          <line x1="17" y1="9" x2="23" y2="15"></line>
+        `;
+        btnEl.classList.add('muted');
+        btnEl.setAttribute('aria-label', '取消静音');
+      } else {
+        // 正常喇叭图标
+        iconEl.innerHTML = `
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+          <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+        `;
+        btnEl.classList.remove('muted');
+        btnEl.setAttribute('aria-label', '静音模式');
+      }
+    }
+
+    /**
+     * 检测指针是否划过扇区边界
+     * 在动画循环中调用，比较当前扇区索引和上次索引
+     * 如果索引发生变化，说明指针跨过了边界线
+     * 
+     * @param {Number} currentAngle - 当前转盘的旋转角度（弧度）
+     * @param {Number} sectorCount - 当前选项数量（扇区数量）
+     * @returns {Boolean} - 是否跨过了扇区边界
+     */
+    function checkSectorBoundary(currentAngle, sectorCount) {
+      const sectorAngle = (2 * Math.PI) / sectorCount;
+      const normalizedAngle = ((currentAngle % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+      const currentSectorIndex = Math.floor(normalizedAngle / sectorAngle);
+
+      // 与上次记录的索引比较
+      if (currentSectorIndex !== lastPlayedSectorIndex) {
+        lastPlayedSectorIndex = currentSectorIndex;
+        return true; // 跨过了边界
+      }
+      return false;
+    }
+
+    /**
+     * 记录上次播放咔嗒声时的扇区索引
+     * 用于检测是否跨过了新的边界
+     */
+    let lastPlayedSectorIndex = -1;
+
     /**
      * =============================================
      * 【开发者注意】后续开发新转盘场景时，仅需修改 SCENES 配置数组即可
@@ -933,15 +1481,8 @@
       }
     ];
 
-    /**
-     * 当前场景配置 - 运行时从 SCENES 中读取
-     * 所有业务逻辑读取 APP_CONFIG 而非直接读取 SCENES
-     */
     let APP_CONFIG = { ...SCENES[0], colors: [...SCENES[0].colors], defaultOptions: [...SCENES[0].defaultOptions] };
 
-    /**
-     * 当前场景索引，用于侧边栏高亮
-     */
     let currentSceneIndex = 0;
 
     const state = {
@@ -968,7 +1509,9 @@
       sidebarToggle: document.getElementById('sidebarToggle'),
       sidebarNav: document.getElementById('sidebarNav'),
       mobileMenuBtn: document.getElementById('mobileMenuBtn'),
-      sidebarOverlay: document.getElementById('sidebarOverlay')
+      sidebarOverlay: document.getElementById('sidebarOverlay'),
+      themeToggle: document.getElementById('themeToggle'),
+      muteToggle: document.getElementById('muteToggle')
     };
 
     const dpr = window.devicePixelRatio || 1;
@@ -1132,22 +1675,47 @@
 
       let lastSectorIndex = -1;
 
+      // 音效控制变量
+      let lastTickTime = 0; // 上次播放咔嗒声的时间
+      const minTickInterval = 60; // 最小咔嗒间隔（毫秒），防止快速旋转时音效重叠爆音
+
       function easeOutQuart(t) {
         return 1 - Math.pow(1 - t, 4);
       }
 
+      /**
+       * 指针划过扇区边界时的反馈
+       * 包括：
+       *   1. 视觉反馈：指针轻微跳动
+       *   2. 听觉反馈：播放"咔嗒"声（带动态频率控制）
+       * 
+       * 动态频率控制逻辑：
+       *   通过检查上次播放时间与当前时间间隔，确保音效不会重叠
+       *   转盘转得快时，自然达到最小间隔限制，音效密集但不会爆音
+       *   转盘减速时，扇区切换间隔变长，音效自然变慢
+       */
       function updatePointerTick(currentAngle) {
         const normalizedAngle = ((currentAngle % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
         const currentSectorIndex = Math.floor(normalizedAngle / sectorAngle);
+
         if (currentSectorIndex !== lastSectorIndex) {
           lastSectorIndex = currentSectorIndex;
 
+          // 视觉反馈：指针跳动
           const pointer = document.querySelector('.pointer');
           if (pointer) {
             pointer.style.transform = 'translateX(-50%) translateY(-4px)';
             setTimeout(() => {
               pointer.style.transform = 'translateX(-50%) translateY(0)';
             }, 80);
+          }
+
+          // 听觉反馈：播放"咔嗒"声
+          // 检查是否超过了最小间隔时间，防止快速旋转时音效重叠
+          const now = performance.now();
+          if (now - lastTickTime >= minTickInterval) {
+            lastTickTime = now;
+            playTickSound();
           }
         }
       }
@@ -1279,8 +1847,11 @@
       state.options.forEach((option, index) => {
         const item = document.createElement('div');
         item.className = 'option-item';
+        item.dataset.index = index;
         item.innerHTML = `
-          <span>${option}</span>
+          <!-- 拖拽手柄：提示用户可以按住这里进行拖动 -->
+          <span class="drag-handle" title="拖拽排序">⋮⋮</span>
+          <span class="option-text">${option}</span>
           <button class="remove-btn" data-index="${index}">×</button>
         `;
         dom.optionsList.appendChild(item);
@@ -1338,6 +1909,9 @@
 
       dom.modalOverlay.classList.add('active');
       createParticles();
+
+      // 播放庆祝音效
+      playCelebrationSound();
     }
 
     function createParticles() {
@@ -1408,13 +1982,12 @@
 
       state.options.push(value);
       APP_CONFIG.defaultOptions = [...state.options];
-      // 同步更新 SCENES 中对应场景的选项
       SCENES[currentSceneIndex].defaultOptions = [...state.options];
       dom.optionInput.value = '';
 
       drawWheel(state.options, APP_CONFIG.colors, state.currentRotation);
       updateUI();
-      renderSidebarItems(); // 更新侧边栏计数
+      renderSidebarItems();
     }
 
     function handleRemoveOption(index) {
@@ -1432,6 +2005,76 @@
     function handleCloseModal() {
       dom.modalOverlay.classList.remove('active');
     }
+
+    /**
+     * =============================================
+     * 拖拽排序模块
+     * 使用 SortableJS 实现选项列表的拖拽排序功能
+     * =============================================
+     */
+
+    /**
+     * 初始化拖拽排序
+     * 绑定 SortableJS 到选项列表容器，监听拖拽结束事件
+     */
+    function initDragSort() {
+      new Sortable(dom.optionsList, {
+        // 拖拽手柄选择器：只有按住 .drag-handle 才能拖动
+        handle: '.drag-handle',
+        // 可拖拽的项选择器
+        draggable: '.option-item',
+        // 拖拽时的动画效果
+        animation: 200,
+        // 幽灵类名（拖拽中的占位符样式）
+        ghostClass: 'sortable-ghost',
+        // 选中类名
+        chosenClass: 'sortable-chosen',
+        // 拖拽中的类名
+        dragClass: 'sortable-drag',
+        // 拖拽结束时的回调
+        onEnd: function(evt) {
+          handleDragSortEnd(evt);
+        }
+      });
+    }
+
+    /**
+     * 拖拽结束后的处理逻辑
+     * 数据驱动视图：根据 DOM 最新顺序反向更新 options 数组，并重绘转盘
+     * @param {Object} evt - SortableJS 事件对象，包含 oldIndex 和 newIndex
+     */
+    function handleDragSortEnd(evt) {
+      const oldIndex = evt.oldIndex;
+      const newIndex = evt.newIndex;
+
+      // 如果位置没有变化，直接返回
+      if (oldIndex === newIndex) return;
+
+      // 根据 DOM 最新顺序反向更新 options 数组
+      // 1. 从数组中移除被拖拽的项
+      const movedItem = state.options.splice(oldIndex, 1)[0];
+      // 2. 插入到新位置
+      state.options.splice(newIndex, 0, movedItem);
+
+      // 同步更新场景配置数据，保持数据一致性
+      APP_CONFIG.defaultOptions = [...state.options];
+      SCENES[currentSceneIndex].defaultOptions = [...state.options];
+
+      // 联动重绘转盘：确保转盘扇区布局与列表顺序完全同步
+      drawWheel(state.options, APP_CONFIG.colors, state.currentRotation);
+
+      // 重新渲染列表 UI（更新删除按钮的 data-index）
+      renderOptionsList();
+
+      // 更新侧边栏显示的最新选项数量
+      renderSidebarItems();
+    }
+
+    /**
+     * =============================================
+     * 事件绑定模块
+     * =============================================
+     */
 
     function initEvents() {
       dom.spinBtn.addEventListener('click', handleSpin);
@@ -1473,9 +2116,31 @@
 
       // 点击遮罩关闭移动端侧边栏
       dom.sidebarOverlay.addEventListener('click', closeMobileSidebar);
+
+      // 主题切换按钮
+      dom.themeToggle.addEventListener('click', toggleTheme);
+
+      // 静音控制按钮
+      dom.muteToggle.addEventListener('click', toggleMute);
+
+      // 初始化拖拽排序功能
+      initDragSort();
     }
 
+    /**
+     * 应用入口
+     * 1. 初始化主题（读取用户偏好或系统偏好）
+     * 2. 初始化 DOM 和 Canvas
+     * 3. 绘制初始转盘
+     * 4. 绑定所有事件
+     */
     function init() {
+      // 先初始化主题，确保页面渲染时已经应用了正确的配色
+      initTheme();
+
+      // 初始化静音状态，读取用户上次保存的偏好
+      initMuteState();
+
       // 初始化配色
       updateCSSVariables(APP_CONFIG.colors);
 
