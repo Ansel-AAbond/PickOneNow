@@ -174,12 +174,14 @@
       background: var(--sidebar-bg);
       backdrop-filter: blur(12px);
       border-right: 1px solid var(--sidebar-border);
+      /* 【移动端修复】层级高于遮罩层（99），确保侧边栏在遮罩之上 */
       z-index: 100;
       display: flex;
       flex-direction: column;
       transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1), transform 0.35s ease, background-color 0.4s ease;
       box-shadow: var(--shadow-sm);
-      overflow: hidden;
+      /* 【移动端修复】移除 overflow: hidden，防止裁剪侧边栏内部的收起按钮 */
+      /* 原 overflow: hidden 用于折叠效果，改用 clip-path 或其他方式处理 */
     }
 
     .sidebar.collapsed {
@@ -211,6 +213,10 @@
     }
 
     .sidebar-toggle {
+      /* 【移动端修复】确保收起按钮层级最高，不被转盘或标题遮挡 */
+      /* 使用 position: relative + z-index 确保按钮在 sidebar 内部层级最高 */
+      position: relative;
+      z-index: 10;
       width: 32px;
       height: 32px;
       border: none;
@@ -223,6 +229,26 @@
       justify-content: center;
       transition: all 0.2s ease;
       flex-shrink: 0;
+      /* 【移动端修复】确保按钮可点击，增加触控热区 */
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      /* 【移动端修复】防止按钮被父元素 overflow: hidden 裁剪 */
+      transform: translateZ(0);
+    }
+
+    /* 【移动端修复】增大侧边栏收起按钮的触控热区，确保手机点击有效 */
+    @media (max-width: 768px) {
+      .sidebar-toggle {
+        width: 44px;
+        height: 44px;
+        /* 【移动端修复】确保按钮在移动端有足够大的点击区域（44x44 是 iOS 推荐最小触控尺寸） */
+        min-width: 44px;
+        min-height: 44px;
+      }
+      .sidebar-toggle svg {
+        width: 22px;
+        height: 22px;
+      }
     }
 
     .sidebar-toggle:hover {
@@ -1226,31 +1252,35 @@
       }
 
       .container {
-        padding: 70px 16px 24px;
+        /* 【移动端垂直间距优化】显著增加上下内边距，避免转盘顶天立地 */
+        padding: 80px 16px 60px;
       }
 
       /* 【移动端布局优化】增大标题区域间距，避免转盘与文字视觉拥挤 */
       .theme-header {
+        /* 显著增大标题与下方转盘的间距，提供舒适呼吸感 */
         margin-bottom: 24px;
       }
 
       .theme-header .theme-title {
-        font-size: 1.8rem;
+        font-size: 1.6rem;
+        /* 增大标题与副标题间距 */
         margin-bottom: 8px;
       }
 
       .theme-header .theme-subtitle {
-        font-size: 0.95rem;
+        font-size: 0.9rem;
+        /* 增大副标题与下方转盘间距 */
         margin-bottom: 16px;
       }
 
       /* 移动端转盘容器尺寸自适应 */
-      /* 使用更小的 clamp 范围，确保转盘在手机上有足够的呼吸空间 */
+      /* 【关键修复】显著缩小转盘尺寸，避免在手机上顶天立地 */
       .wheel-container {
-        width: clamp(240px, 75vw, 360px);
-        height: clamp(240px, 75vw, 360px);
-        /* 增加转盘上下间距 */
-        margin-bottom: 20px;
+        width: clamp(220px, 68vw, 320px);
+        height: clamp(220px, 68vw, 320px);
+        /* 显著增加转盘下方间距，避免按钮紧贴转盘 */
+        margin-bottom: 24px;
       }
 
       /* 移动端转盘光晕效果缩小 */
@@ -1262,7 +1292,19 @@
 
       /* 移动端按钮与转盘间距优化 */
       .spin-btn {
+        /* 增大按钮与转盘间距 */
         margin-top: 16px;
+      }
+
+      /* 移动端提示文字间距优化 */
+      .hint-text {
+        margin-top: 16px;
+      }
+
+      /* 【移动端修复】增大选项列表区域上间距 */
+      .options-section {
+        margin-top: 24px;
+      }
       }
     }
 
@@ -2855,11 +2897,24 @@
       });
 
       // 侧边栏展开/收起
-      // 【移动端修复】同时监听 click 和 touchend 事件，确保手机端点击有效
-      dom.sidebarToggle.addEventListener('click', toggleSidebar);
+      // 【移动端修复】在手机上点击收起按钮时，调用 closeMobileSidebar 而不是 toggleSidebar
+      // toggleSidebar 只切换 collapsed 类（桌面端折叠效果），对移动端无效
+      dom.sidebarToggle.addEventListener('click', () => {
+        // 移动端优先判断：如果侧边栏处于 mobile-open 状态，则收起它
+        if (window.innerWidth <= 768 && dom.sidebar.classList.contains('mobile-open')) {
+          closeMobileSidebar();
+        } else {
+          toggleSidebar();
+        }
+      });
       dom.sidebarToggle.addEventListener('touchend', (e) => {
         e.preventDefault();
-        toggleSidebar();
+        // 【移动端修复】触摸事件同样需要判断移动端状态
+        if (window.innerWidth <= 768 && dom.sidebar.classList.contains('mobile-open')) {
+          closeMobileSidebar();
+        } else {
+          toggleSidebar();
+        }
       });
 
       // 移动端汉堡菜单
