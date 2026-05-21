@@ -696,7 +696,14 @@
     }
 
     .sortable-drag {
+      /* 禁用 transition，消除 SortableJS 克隆元素创建时的 0.2s 过渡动画导致的重影 */
+      transition: none !important;
+      /* 确保克隆元素立即渲染，无动画延迟 */
+      animation: none !important;
       opacity: 0.9;
+      background: var(--card-bg);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      border-radius: 20px;
     }
 
     .option-item .remove-btn {
@@ -1286,6 +1293,22 @@
         width: 105%;
         height: 105%;
         filter: blur(15px);
+      }
+
+      /* 移动端指针：确保箭头尖端突出转盘外边缘 */
+      .pointer {
+        top: -42px;
+        border-left: 14px solid transparent;
+        border-right: 14px solid transparent;
+        border-top: 28px solid var(--primary-color);
+        filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.4));
+      }
+
+      .pointer::after {
+        top: -48px;
+        width: 10px;
+        height: 10px;
+        box-shadow: 0 0 8px rgba(255, 107, 107, 0.6);
       }
 
       /* 移动端按钮与转盘间距优化 */
@@ -2359,7 +2382,9 @@
           // 视觉反馈：指针跳动
           const pointer = document.querySelector('.pointer');
           if (pointer) {
-            pointer.style.transform = 'translateX(-50%) translateY(-4px)';
+            // 根据屏幕宽度调整跳动距离：移动端缩小
+            const tickDistance = window.innerWidth <= 768 ? '-3px' : '-4px';
+            pointer.style.transform = 'translateX(-50%) translateY(' + tickDistance + ')';
             setTimeout(() => {
               pointer.style.transform = 'translateX(-50%) translateY(0)';
             }, 80);
@@ -2742,19 +2767,12 @@
      */
     function initDragSort() {
       new Sortable(dom.optionsList, {
-        // 拖拽手柄选择器：只有按住 .drag-handle 才能拖动
         handle: '.drag-handle',
-        // 可拖拽的项选择器
         draggable: '.option-item',
-        // 拖拽时的动画效果
         animation: 200,
-        // 幽灵类名（拖拽中的占位符样式）
         ghostClass: 'sortable-ghost',
-        // 选中类名
         chosenClass: 'sortable-chosen',
-        // 拖拽中的类名
         dragClass: 'sortable-drag',
-        // 拖拽结束时的回调
         onEnd: function(evt) {
           handleDragSortEnd(evt);
         }
