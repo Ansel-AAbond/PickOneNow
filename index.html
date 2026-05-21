@@ -976,6 +976,8 @@
       opacity: 0;
       transition: opacity 0.3s ease;
       backdrop-filter: blur(2px);
+      /* 确保遮罩层可点击 */
+      cursor: pointer;
     }
 
     .sidebar-overlay.active {
@@ -1227,10 +1229,28 @@
         padding: 70px 16px 24px;
       }
 
+      /* 【移动端布局优化】增大标题区域间距，避免转盘与文字视觉拥挤 */
+      .theme-header {
+        margin-bottom: 24px;
+      }
+
+      .theme-header .theme-title {
+        font-size: 1.8rem;
+        margin-bottom: 8px;
+      }
+
+      .theme-header .theme-subtitle {
+        font-size: 0.95rem;
+        margin-bottom: 16px;
+      }
+
       /* 移动端转盘容器尺寸自适应 */
+      /* 使用更小的 clamp 范围，确保转盘在手机上有足够的呼吸空间 */
       .wheel-container {
-        width: clamp(260px, 80vw, 400px);
-        height: clamp(260px, 80vw, 400px);
+        width: clamp(240px, 75vw, 360px);
+        height: clamp(240px, 75vw, 360px);
+        /* 增加转盘上下间距 */
+        margin-bottom: 20px;
       }
 
       /* 移动端转盘光晕效果缩小 */
@@ -1238,6 +1258,11 @@
         width: 105%;
         height: 105%;
         filter: blur(15px);
+      }
+
+      /* 移动端按钮与转盘间距优化 */
+      .spin-btn {
+        margin-top: 16px;
       }
     }
 
@@ -2830,10 +2855,24 @@
       });
 
       // 侧边栏展开/收起
+      // 【移动端修复】同时监听 click 和 touchend 事件，确保手机端点击有效
       dom.sidebarToggle.addEventListener('click', toggleSidebar);
+      dom.sidebarToggle.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        toggleSidebar();
+      });
 
       // 移动端汉堡菜单
+      // 【移动端修复】同时监听 click 和 touchend 事件
       dom.mobileMenuBtn.addEventListener('click', () => {
+        if (dom.sidebar.classList.contains('mobile-open')) {
+          closeMobileSidebar();
+        } else {
+          openMobileSidebar();
+        }
+      });
+      dom.mobileMenuBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
         if (dom.sidebar.classList.contains('mobile-open')) {
           closeMobileSidebar();
         } else {
@@ -2842,7 +2881,12 @@
       });
 
       // 点击遮罩关闭移动端侧边栏
+      // 【移动端修复】同时监听 click 和 touchend 事件
       dom.sidebarOverlay.addEventListener('click', closeMobileSidebar);
+      dom.sidebarOverlay.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        closeMobileSidebar();
+      });
 
       // 主题切换按钮
       dom.themeToggle.addEventListener('click', toggleTheme);
