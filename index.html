@@ -2,7 +2,8 @@
 <html lang="zh-CN" data-theme="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- 移动端视口设置：禁止缩放，确保页面宽度跟随设备宽度 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>随机决策转盘</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -453,6 +454,8 @@
       box-shadow: 
         0 0 40px rgba(0, 0, 0, 0.4),
         inset 0 0 20px rgba(0, 0, 0, 0.2);
+      /* 移动端防止触摸时触发页面滚动 */
+      touch-action: none;
     }
 
     .pointer {
@@ -972,6 +975,7 @@
       z-index: 99;
       opacity: 0;
       transition: opacity 0.3s ease;
+      backdrop-filter: blur(2px);
     }
 
     .sidebar-overlay.active {
@@ -979,11 +983,213 @@
       opacity: 1;
     }
 
+    /* 转盘容器移动端优化 */
+    .wheel-section {
+      touch-action: none; /* 防止转盘区域滑动时触发页面滚动 */
+    }
+
+    /* 移动端按钮触控热区优化 */
+    @media (max-width: 768px) {
+      .spin-btn {
+        width: 100px;
+        height: 100px;
+        font-size: 1.1rem;
+      }
+    }
+
+    /* =============================================
+       自定义场景功能样式
+       ============================================= */
+
+    /* 侧边栏新建场景按钮 */
+    .sidebar-add-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 14px;
+      margin: 8px 10px 16px;
+      border-radius: 12px;
+      border: 2px dashed var(--sidebar-border);
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .sidebar-add-btn:hover {
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      background: var(--sidebar-item-active);
+    }
+
+    .sidebar-add-btn svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    /* 自定义场景删除按钮 */
+    .sidebar-item-delete {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 24px;
+      height: 24px;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: all 0.2s ease;
+    }
+
+    .sidebar-item:hover .sidebar-item-delete {
+      opacity: 1;
+    }
+
+    .sidebar-item-delete:hover {
+      background: var(--tag-remove-bg);
+      color: #ff4757;
+    }
+
+    /* 新建场景模态框 */
+    .custom-scene-modal {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 32px;
+      max-width: 480px;
+      width: 90%;
+      max-height: 85vh;
+      overflow-y: auto;
+      transform: scale(0.9) translateY(20px);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.4s ease;
+      box-shadow: var(--modal-shadow);
+      position: relative;
+      border: 1px solid var(--card-border);
+    }
+
+    .modal-overlay.active .custom-scene-modal {
+      transform: scale(1) translateY(0);
+    }
+
+    .custom-scene-modal h3 {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      color: var(--text-color);
+      margin-bottom: 8px;
+    }
+
+    .custom-scene-modal .modal-hint {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .custom-scene-modal .form-group {
+      margin-bottom: 20px;
+    }
+
+    .custom-scene-modal label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-color);
+      margin-bottom: 8px;
+    }
+
+    .custom-scene-modal input,
+    .custom-scene-modal textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid var(--input-border);
+      border-radius: 10px;
+      background: var(--input-bg);
+      color: var(--text-color);
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+    }
+
+    .custom-scene-modal input:focus,
+    .custom-scene-modal textarea:focus {
+      outline: none;
+      border-color: var(--input-border-focus);
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 0 4px var(--input-focus-ring);
+    }
+
+    .custom-scene-modal textarea {
+      min-height: 150px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    .custom-scene-modal .modal-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .custom-scene-modal .btn-cancel {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid var(--input-border);
+      border-radius: 10px;
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .custom-scene-modal .btn-cancel:hover {
+      border-color: var(--text-muted);
+      color: var(--text-color);
+    }
+
+    .custom-scene-modal .btn-save {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--primary-color), #ff8e53);
+      color: white;
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .custom-scene-modal .btn-save:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(255, 107, 107, 0.4);
+    }
+
+    .custom-scene-modal .btn-save:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
     /* 响应式适配 */
     @media (max-width: 768px) {
       .sidebar {
         transform: translateX(-100%);
-        width: var(--sidebar-width) !important;
+        width: 85vw !important;
+        max-width: 300px;
+        box-shadow: 2px 0 12px rgba(0, 0, 0, 0.3);
       }
 
       .sidebar.mobile-open {
@@ -1006,13 +1212,32 @@
         display: flex;
       }
 
+      /* 移动端右上角按钮组布局 */
       .theme-toggle {
         right: 16px;
         top: 16px;
       }
 
+      .mute-toggle {
+        right: 68px;
+        top: 16px;
+      }
+
       .container {
         padding: 70px 16px 24px;
+      }
+
+      /* 移动端转盘容器尺寸自适应 */
+      .wheel-container {
+        width: clamp(260px, 80vw, 400px);
+        height: clamp(260px, 80vw, 400px);
+      }
+
+      /* 移动端转盘光晕效果缩小 */
+      .wheel-container::before {
+        width: 105%;
+        height: 105%;
+        filter: blur(15px);
       }
     }
 
@@ -1124,6 +1349,32 @@
       <h3>决定就是它了！</h3>
       <p class="modal-result" id="modalResult"></p>
       <button id="modalCloseBtn" class="modal-close-btn">好的，就选这个</button>
+    </div>
+  </div>
+
+  <!-- =============================================
+       自定义场景创建模态框
+       点击"+ 新建自定义场景"按钮后弹出
+       ============================================= -->
+  <div id="customSceneModalOverlay" class="modal-overlay">
+    <div class="custom-scene-modal">
+      <h3>✨ 新建自定义场景</h3>
+      <p class="modal-hint">创建属于你自己的转盘！设置场景名称和选项后，新场景会出现在左侧列表并自动保存。</p>
+      
+      <div class="form-group">
+        <label for="customSceneName">场景名称</label>
+        <input type="text" id="customSceneName" placeholder="例如：周末去哪玩、今天看什么电影..." maxlength="20">
+      </div>
+
+      <div class="form-group">
+        <label for="customSceneOptions">选项列表</label>
+        <textarea id="customSceneOptions" placeholder="每行输入一个选项，例如：&#10;火锅&#10;烧烤&#10;日料&#10;披萨&#10;麻辣烫"></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button id="customSceneCancel" class="btn-cancel">取消</button>
+        <button id="customSceneSave" class="btn-save">保存场景</button>
+      </div>
     </div>
   </div>
 
@@ -1251,6 +1502,7 @@
      * 延迟初始化，用户首次交互时创建（浏览器要求）
      */
     let audioCtx = null;
+    let audioUnlocked = false; // 标记音频上下文是否已解锁
 
     /**
      * 初始化静音状态
@@ -1275,6 +1527,62 @@
         audioCtx.resume();
       }
       return audioCtx;
+    }
+
+    /**
+     * 音频上下文解锁（Audio Unlocking）
+     * 
+     * 【解决浏览器首次音频延迟问题】
+     * 现代浏览器（尤其是 Chrome）的自动播放策略要求：
+     *   1. AudioContext 必须在用户手势交互（点击/触摸）后才能播放音频
+     *   2. 首次创建时状态为 'suspended'，需要调用 resume() 激活
+     *   3. resume() 是异步操作，首次调用会有几十毫秒的延迟
+     * 
+     * 解决方案：
+     *   在用户首次点击页面的任何交互元素时，立即创建并激活音频上下文
+     *   播放一段极短的静音（0.001秒），确保音频管道完全就绪
+     *   这样后续的真实音效播放时就没有初始化延迟了
+     */
+    function unlockAudio() {
+      if (audioUnlocked) return; // 已经解锁过，不需要重复执行
+
+      try {
+        const ctx = getAudioContext();
+
+        // 如果音频上下文仍然处于 suspended 状态，等待它恢复完成
+        if (ctx.state === 'suspended') {
+          ctx.resume().then(() => {
+            // resume 完成后，播放一段极短的静音来"唤醒"音频系统
+            playSilentTone(ctx);
+          });
+        } else {
+          // 如果已经是 running 状态，直接播放静音
+          playSilentTone(ctx);
+        }
+      } catch (e) {
+        console.warn('Audio unlock failed:', e);
+      }
+    }
+
+    /**
+     * 播放极短的静音音调，完成音频管道解锁
+     * 这段静音用户听不到，但足以让浏览器认为音频系统已激活
+     * @param {AudioContext} ctx - 已创建的音频上下文
+     */
+    function playSilentTone(ctx) {
+      const oscillator = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(ctx.destination);
+
+      // 音量设为 0（完全静音），持续时间极短（1ms）
+      gainNode.gain.setValueAtTime(0, ctx.currentTime);
+      oscillator.start(ctx.currentTime);
+      oscillator.stop(ctx.currentTime + 0.001);
+
+      // 标记音频已解锁
+      audioUnlocked = true;
     }
 
     /**
@@ -1481,7 +1789,132 @@
       }
     ];
 
-    let APP_CONFIG = { ...SCENES[0], colors: [...SCENES[0].colors], defaultOptions: [...SCENES[0].defaultOptions] };
+    /**
+     * =============================================
+     * 自定义场景管理模块
+     * 使用 localStorage 持久化用户创建的自定义场景
+     * =============================================
+     */
+
+    /**
+     * localStorage 键名：存储用户创建的所有自定义场景
+     * 数据结构：数组，每个元素包含场景的所有配置
+     */
+    const CUSTOM_SCENES_STORAGE_KEY = 'wheel-custom-scenes';
+
+    /**
+     * 从 localStorage 加载自定义场景
+     * @returns {Array} - 自定义场景数组
+     */
+    function loadCustomScenes() {
+      try {
+        const saved = localStorage.getItem(CUSTOM_SCENES_STORAGE_KEY);
+        if (saved) {
+          return JSON.parse(saved);
+        }
+      } catch (e) {
+        console.warn('Failed to load custom scenes:', e);
+      }
+      return [];
+    }
+
+    /**
+     * 保存所有自定义场景到 localStorage
+     * @param {Array} customScenes - 自定义场景数组
+     */
+    function saveCustomScenes(customScenes) {
+      try {
+        localStorage.setItem(CUSTOM_SCENES_STORAGE_KEY, JSON.stringify(customScenes));
+      } catch (e) {
+        console.warn('Failed to save custom scenes:', e);
+      }
+    }
+
+    /**
+     * 生成唯一的自定义场景 ID
+     * 使用 "custom_" 前缀 + 时间戳，避免与预设场景 ID 冲突
+     * @returns {String} - 唯一场景 ID
+     */
+    function generateCustomSceneId() {
+      return 'custom_' + Date.now();
+    }
+
+    /**
+     * 生成随机配色方案
+     * 为自定义场景提供一组和谐的颜色
+     * @returns {Array} - 颜色数组
+     */
+    function generateRandomColors(count) {
+      const presetColors = [
+        '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8',
+        '#F7DC6F', '#BB8FCE', '#82E0AA', '#A29BFE', '#FD79A8',
+        '#FDCB6E', '#00CEC9', '#E17055', '#6C5CE7', '#00B894',
+        '#FAB1A0', '#74B9FF', '#55EFC4', '#FFEAA7', '#DFE6E9'
+      ];
+
+      // 随机打乱并选取所需数量
+      const shuffled = [...presetColors].sort(() => Math.random() - 0.5);
+      const colors = [];
+      for (let i = 0; i < count; i++) {
+        colors.push(shuffled[i % shuffled.length]);
+      }
+      return colors;
+    }
+
+    /**
+     * 创建自定义场景对象
+     * @param {String} name - 场景名称
+     * @param {Array} options - 选项数组
+     * @returns {Object} - 完整的场景对象
+     */
+    function createCustomScene(name, options) {
+      return {
+        id: generateCustomSceneId(),
+        icon: '✨',
+        themeName: name,
+        defaultOptions: [...options],
+        colors: generateRandomColors(options.length),
+        spinDuration: 5000,
+        canvasSize: 450,
+        isCustom: true // 标记为自定义场景，用于区分预设场景（不可删除）
+      };
+    }
+
+    /**
+     * 加载并合并所有场景（预设 + 自定义）
+     * @returns {Array} - 合并后的完整场景列表
+     */
+    function getAllScenes() {
+      const customScenes = loadCustomScenes();
+      return [...SCENES, ...customScenes];
+    }
+
+    /**
+     * 保存新的自定义场景
+     * @param {Object} newScene - 新的场景对象
+     */
+    function addCustomScene(newScene) {
+      const customScenes = loadCustomScenes();
+      customScenes.push(newScene);
+      saveCustomScenes(customScenes);
+    }
+
+    /**
+     * 删除自定义场景
+     * @param {String} sceneId - 要删除的场景 ID
+     */
+    function removeCustomScene(sceneId) {
+      let customScenes = loadCustomScenes();
+      customScenes = customScenes.filter(scene => scene.id !== sceneId);
+      saveCustomScenes(customScenes);
+    }
+
+    /**
+     * 当前完整的场景列表（预设 + 自定义）
+     */
+    let ALL_SCENES = getAllScenes();
+
+    let APP_CONFIG = { ...ALL_SCENES[0], colors: [...ALL_SCENES[0].colors], defaultOptions: [...ALL_SCENES[0].defaultOptions] };
 
     let currentSceneIndex = 0;
 
@@ -1602,14 +2035,15 @@
         ctx.lineWidth = 2;
         ctx.stroke();
 
-        // 文字 - 使用逻辑像素，由 devicePixelRatio 缩放保证清晰
+        // 文字 - 使用动态字号，根据屏幕宽度自动适配
         ctx.save();
         ctx.rotate(startAngle + arcAngle / 2);
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = '#fff';
 
-        const fontSize = options.length <= 6 ? 16 : options.length <= 12 ? 14 : 12;
+        // 动态计算字号：小屏幕自动缩小
+        const fontSize = getDynamicFontSize(options.length);
         ctx.font = `bold ${fontSize}px "Noto Sans SC", sans-serif`;
         ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
         ctx.shadowBlur = 4;
@@ -1642,6 +2076,105 @@
       const g = Math.min(255, ((num & 0x0000FF) >> 8) + Math.round(255 * percent / 100));
       const b = Math.min(255, (num & 0x0000FF) + Math.round(255 * percent / 100));
       return `rgb(${r}, ${g}, ${b})`;
+    }
+
+    /**
+     * =============================================
+     * 移动端响应式适配模块
+     * 功能：
+     *   1. 动态计算转盘 Canvas 尺寸（根据屏幕宽度）
+     *   2. 根据转盘尺寸动态调整扇区文字大小
+     *   3. 监听窗口大小变化（resize 事件），横竖屏切换自动适配
+     * =============================================
+     */
+
+    /**
+     * 计算移动端合适的转盘尺寸
+     * 优先使用 CSS 计算出的实际容器宽度，确保转盘在手机上居中且留有呼吸间距
+     * @returns {Number} - 转盘逻辑尺寸（像素）
+     */
+    function calculateWheelSize() {
+      const container = document.querySelector('.wheel-container');
+      if (!container) return APP_CONFIG.canvasSize;
+
+      // 获取容器实际渲染宽度（CSS clamp 计算后的值）
+      const containerWidth = container.getBoundingClientRect().width;
+
+      // 使用容器宽度作为转盘逻辑尺寸
+      // 在移动端，容器宽度约为 80vw，约为 260-400px
+      const logicalSize = Math.round(containerWidth);
+
+      // 限制尺寸范围，防止过小或过大
+      const minSize = 260;
+      const maxSize = 500;
+      return Math.max(minSize, Math.min(maxSize, logicalSize));
+    }
+
+    /**
+     * 根据转盘半径动态计算扇区文字大小
+     * 小屏幕上文字自动缩小，确保不重叠且清晰可读
+     * @param {Number} radius - 转盘半径（逻辑像素）
+     * @param {Number} optionCount - 选项数量
+     * @returns {Number} - 合适的文字字号（像素）
+     */
+    function calculateFontSize(radius, optionCount) {
+      // 基础字号基于半径比例计算
+      // 半径的 5%-7% 作为基础字号
+      const baseFontSize = Math.round(radius * 0.065);
+
+      // 根据选项数量进行缩放
+      let scaleFactor = 1;
+      if (optionCount > 12) scaleFactor = 0.75;
+      else if (optionCount > 8) scaleFactor = 0.85;
+
+      const fontSize = Math.round(baseFontSize * scaleFactor);
+
+      // 限制字号范围
+      const minFontSize = 10;
+      const maxFontSize = 18;
+      return Math.max(minFontSize, Math.min(maxFontSize, fontSize));
+    }
+
+    /**
+     * 窗口大小变化时的处理逻辑
+     * 重新计算转盘尺寸，并触发重绘
+     */
+    let resizeTimer = null;
+    function handleResize() {
+      // 使用防抖，避免频繁触发
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        if (!state.isSpinning) {
+          // 获取新的转盘尺寸
+          const newLogicalSize = calculateWheelSize();
+
+          // 更新 Canvas 物理尺寸
+          const physicalSize = Math.round(newLogicalSize * dpr);
+          dom.canvas.width = physicalSize;
+          dom.canvas.height = physicalSize;
+
+          // 重新设置高清缩放
+          dom.ctx.setTransform(1, 0, 0, 1, 0, 0);
+          dom.ctx.scale(dpr, dpr);
+
+          // 更新 APP_CONFIG 中的 canvasSize
+          APP_CONFIG.canvasSize = newLogicalSize;
+
+          // 重绘转盘
+          drawWheel(state.options, APP_CONFIG.colors, state.currentRotation);
+        }
+      }, 200);
+    }
+
+    /**
+     * 获取当前转盘的动态字号（供 drawWheel 调用）
+     * @param {Number} optionCount - 选项数量
+     * @returns {Number} - 当前合适的字号
+     */
+    function getDynamicFontSize(optionCount) {
+      const size = APP_CONFIG.canvasSize;
+      const radius = size / 2 - 30;
+      return calculateFontSize(radius, optionCount);
     }
 
     /**
@@ -1763,7 +2296,7 @@
     function switchScene(sceneIndex) {
       if (sceneIndex === currentSceneIndex || state.isSpinning) return;
 
-      const newScene = SCENES[sceneIndex];
+      const newScene = ALL_SCENES[sceneIndex];
       if (!newScene) return;
 
       currentSceneIndex = sceneIndex;
@@ -1861,21 +2394,89 @@
     /**
      * 渲染侧边栏场景列表
      */
+    /**
+     * 渲染侧边栏场景列表
+     * 支持预设场景和自定义场景的混合显示
+     * 自定义场景带删除按钮，预设场景不可删除
+     */
     function renderSidebarItems() {
       dom.sidebarNav.innerHTML = '<div class="sidebar-nav-label">决策场景</div>';
 
-      SCENES.forEach((scene, index) => {
+      ALL_SCENES.forEach((scene, index) => {
         const item = document.createElement('div');
         item.className = `sidebar-item${index === currentSceneIndex ? ' active' : ''}`;
         item.dataset.index = index;
+
+        // 预设场景无删除按钮，自定义场景有删除按钮
+        const deleteButtonHTML = scene.isCustom
+          ? `<button class="sidebar-item-delete" data-scene-id="${scene.id}" title="删除场景">🗑️</button>`
+          : '';
+
         item.innerHTML = `
           <span class="sidebar-item-icon">${scene.icon}</span>
           <span class="sidebar-item-text">${scene.themeName}</span>
           <span class="sidebar-item-count">${scene.defaultOptions.length}项</span>
+          ${deleteButtonHTML}
         `;
-        item.addEventListener('click', () => switchScene(index));
+
+        // 点击场景项切换转盘
+        item.addEventListener('click', (e) => {
+          // 如果点击的是删除按钮，不切换场景
+          if (e.target.classList.contains('sidebar-item-delete')) return;
+          switchScene(index);
+        });
+
+        // 删除按钮事件
+        if (scene.isCustom) {
+          const deleteBtn = item.querySelector('.sidebar-item-delete');
+          deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            handleDeleteCustomScene(scene.id, index);
+          });
+        }
+
         dom.sidebarNav.appendChild(item);
       });
+
+      // 在侧边栏导航底部添加"+ 新建自定义场景"按钮
+      const addBtn = document.createElement('button');
+      addBtn.className = 'sidebar-add-btn';
+      addBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        <span>新建自定义场景</span>
+      `;
+      addBtn.addEventListener('click', openCustomSceneModal);
+      dom.sidebarNav.appendChild(addBtn);
+    }
+
+    /**
+     * 删除自定义场景
+     * @param {String} sceneId - 场景 ID
+     * @param {Number} sceneIndex - 场景在 ALL_SCENES 中的索引
+     */
+    function handleDeleteCustomScene(sceneId, sceneIndex) {
+      if (!confirm('确定要删除这个自定义场景吗？')) return;
+
+      // 从 localStorage 中删除
+      removeCustomScene(sceneId);
+
+      // 重新加载场景列表
+      ALL_SCENES = getAllScenes();
+
+      // 如果删除的是当前选中的场景，切换到第一个场景
+      if (sceneIndex === currentSceneIndex) {
+        currentSceneIndex = 0;
+        switchScene(0);
+      } else {
+        // 否则更新索引（因为删除后索引会变化）
+        if (sceneIndex < currentSceneIndex) {
+          currentSceneIndex--;
+        }
+        renderSidebarItems();
+      }
     }
 
     /**
@@ -1982,7 +2583,7 @@
 
       state.options.push(value);
       APP_CONFIG.defaultOptions = [...state.options];
-      SCENES[currentSceneIndex].defaultOptions = [...state.options];
+      ALL_SCENES[currentSceneIndex].defaultOptions = [...state.options];
       dom.optionInput.value = '';
 
       drawWheel(state.options, APP_CONFIG.colors, state.currentRotation);
@@ -1995,7 +2596,7 @@
 
       state.options.splice(index, 1);
       APP_CONFIG.defaultOptions = [...state.options];
-      SCENES[currentSceneIndex].defaultOptions = [...state.options];
+      ALL_SCENES[currentSceneIndex].defaultOptions = [...state.options];
 
       drawWheel(state.options, APP_CONFIG.colors, state.currentRotation);
       updateUI();
@@ -2058,7 +2659,7 @@
 
       // 同步更新场景配置数据，保持数据一致性
       APP_CONFIG.defaultOptions = [...state.options];
-      SCENES[currentSceneIndex].defaultOptions = [...state.options];
+      ALL_SCENES[currentSceneIndex].defaultOptions = [...state.options];
 
       // 联动重绘转盘：确保转盘扇区布局与列表顺序完全同步
       drawWheel(state.options, APP_CONFIG.colors, state.currentRotation);
@@ -2076,7 +2677,133 @@
      * =============================================
      */
 
+    /**
+     * =============================================
+     * 自定义场景模态框控制模块
+     * =============================================
+     */
+
+    /**
+     * DOM 引用：自定义场景模态框相关元素
+     */
+    const customSceneModalOverlay = document.getElementById('customSceneModalOverlay');
+    const customSceneNameInput = document.getElementById('customSceneName');
+    const customSceneOptionsInput = document.getElementById('customSceneOptions');
+    const customSceneSaveBtn = document.getElementById('customSceneSave');
+    const customSceneCancelBtn = document.getElementById('customSceneCancel');
+
+    /**
+     * 打开自定义场景创建模态框
+     */
+    function openCustomSceneModal() {
+      // 清空表单
+      customSceneNameInput.value = '';
+      customSceneOptionsInput.value = '';
+      customSceneSaveBtn.disabled = false;
+
+      // 显示模态框
+      customSceneModalOverlay.classList.add('active');
+
+      // 聚焦到名称输入框
+      setTimeout(() => customSceneNameInput.focus(), 300);
+    }
+
+    /**
+     * 关闭自定义场景创建模态框
+     */
+    function closeCustomSceneModal() {
+      customSceneModalOverlay.classList.remove('active');
+    }
+
+    /**
+     * 验证自定义场景表单
+     * @returns {Boolean} - 表单是否有效
+     */
+    function validateCustomSceneForm() {
+      const name = customSceneNameInput.value.trim();
+      const optionsText = customSceneOptionsInput.value.trim();
+
+      // 场景名称不能为空
+      if (!name) {
+        customSceneNameInput.focus();
+        return false;
+      }
+
+      // 选项不能为空
+      if (!optionsText) {
+        customSceneOptionsInput.focus();
+        return false;
+      }
+
+      // 解析选项（按换行符分割）
+      const options = optionsText.split('\n').map(opt => opt.trim()).filter(opt => opt.length > 0);
+
+      // 至少需要 2 个选项
+      if (options.length < 2) {
+        alert('请至少输入 2 个选项！');
+        customSceneOptionsInput.focus();
+        return false;
+      }
+
+      return true;
+    }
+
+    /**
+     * 保存自定义场景
+     * 1. 验证表单
+     * 2. 创建场景对象
+     * 3. 添加到 ALL_SCENES 和 localStorage
+     * 4. 切换到新场景
+     * 5. 关闭模态框
+     */
+    function saveCustomScene() {
+      if (!validateCustomSceneForm()) return;
+
+      const name = customSceneNameInput.value.trim();
+      const optionsText = customSceneOptionsInput.value.trim();
+      const options = optionsText.split('\n').map(opt => opt.trim()).filter(opt => opt.length > 0);
+
+      // 创建场景对象
+      const newScene = createCustomScene(name, options);
+
+      // 保存到 localStorage
+      addCustomScene(newScene);
+
+      // 更新 ALL_SCENES
+      ALL_SCENES = getAllScenes();
+
+      // 关闭模态框
+      closeCustomSceneModal();
+
+      // 切换到新创建的场景（它在列表最后）
+      const newSceneIndex = ALL_SCENES.length - 1;
+      switchScene(newSceneIndex);
+    }
+
+    /**
+     * =============================================
+     * 事件绑定模块
+     * =============================================
+     */
+
+    /**
+     * 全局音频解锁触发器
+     * 监听页面首次点击事件，在用户第一次交互时立即解锁音频系统
+     * 解锁完成后自动移除监听器，避免不必要的性能开销
+     */
+    function handleFirstInteraction() {
+      unlockAudio();
+      // 解锁完成后，移除全局监听器（只需执行一次）
+      document.removeEventListener('click', handleFirstInteraction);
+      document.removeEventListener('touchstart', handleFirstInteraction);
+    }
+
     function initEvents() {
+      // 【关键修复】绑定全局首次交互监听器，提前解锁音频系统
+      // 用户第一次点击页面任何位置时，都会触发音频解锁，消除首次音效延迟
+      document.addEventListener('click', handleFirstInteraction);
+      document.addEventListener('touchstart', handleFirstInteraction);
+
       dom.spinBtn.addEventListener('click', handleSpin);
 
       dom.addBtn.addEventListener('click', handleAddOption);
@@ -2125,6 +2852,31 @@
 
       // 初始化拖拽排序功能
       initDragSort();
+
+      // =============================================
+      // 自定义场景模态框事件绑定
+      // =============================================
+
+      // 保存按钮
+      customSceneSaveBtn.addEventListener('click', saveCustomScene);
+
+      // 取消按钮
+      customSceneCancelBtn.addEventListener('click', closeCustomSceneModal);
+
+      // 点击遮罩关闭模态框
+      customSceneModalOverlay.addEventListener('click', (e) => {
+        if (e.target === customSceneModalOverlay) {
+          closeCustomSceneModal();
+        }
+      });
+
+      // 回车键保存场景（在选项文本框中换行）
+      customSceneNameInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          saveCustomScene();
+        }
+      });
     }
 
     /**
@@ -2133,6 +2885,7 @@
      * 2. 初始化 DOM 和 Canvas
      * 3. 绘制初始转盘
      * 4. 绑定所有事件
+     * 5. 注册窗口大小变化监听（移动端横竖屏适配）
      */
     function init() {
       // 先初始化主题，确保页面渲染时已经应用了正确的配色
@@ -2148,6 +2901,25 @@
       drawWheel(state.options, APP_CONFIG.colors, 0);
       renderSidebarItems();
       initEvents();
+
+      // 【移动端适配】监听窗口大小变化，横竖屏切换时自动重绘转盘
+      window.addEventListener('resize', handleResize);
+
+      // 【移动端适配】防止 iOS Safari 双击缩放
+      document.addEventListener('touchstart', function(e) {
+        if (e.touches.length > 1) {
+          e.preventDefault();
+        }
+      }, { passive: false });
+
+      let lastTouchEnd = 0;
+      document.addEventListener('touchend', function(e) {
+        const now = Date.now();
+        if (now - lastTouchEnd <= 300) {
+          e.preventDefault();
+        }
+        lastTouchEnd = now;
+      }, false);
     }
 
     init();
