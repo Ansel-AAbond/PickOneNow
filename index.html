@@ -480,8 +480,8 @@
       box-shadow: 
         0 0 40px rgba(0, 0, 0, 0.4),
         inset 0 0 20px rgba(0, 0, 0, 0.2);
-      /* 移动端防止触摸时触发页面滚动 */
-      touch-action: none;
+      /* 【移动端修复】移除 Canvas 的 touch-action: none，允许用户在转盘本体上也能正常滑动页面 */
+      /* 转盘的旋转由"开始旋转"按钮触发，不需要通过触摸 Canvas 来操作，因此移除此限制不影响转盘功能 */
     }
 
     .pointer {
@@ -1012,9 +1012,9 @@
     }
 
     /* 转盘容器移动端优化 */
-    .wheel-section {
-      touch-action: none; /* 防止转盘区域滑动时触发页面滚动 */
-    }
+    /* 【移动端修复】移除 .wheel-section 的 touch-action: none，恢复页面在转盘外部区域的正常滚动 */
+    /* 之前此属性导致整个转盘区域（包括标题、按钮、空白处）都无法上下滑动 */
+    /* 现在仅在 #wheelCanvas 本体保留 touch-action: none，确保转盘操作不触发页面滚动 */
 
     /* 移动端按钮触控热区优化 */
     @media (max-width: 768px) {
