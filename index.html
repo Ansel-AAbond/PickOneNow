@@ -1252,38 +1252,36 @@
       }
 
       .container {
-        /* 【移动端垂直间距优化】显著增加上下内边距，避免转盘顶天立地 */
-        padding: 80px 16px 60px;
+        /* 【移动端垂直间距优化】大幅增加上下内边距，确保转盘有充足呼吸空间 */
+        padding: 80px 16px 100px;
       }
 
-      /* 【移动端布局优化】增大标题区域间距，避免转盘与文字视觉拥挤 */
-      .theme-header {
-        /* 显著增大标题与下方转盘的间距，提供舒适呼吸感 */
-        margin-bottom: 24px;
+      /* 【手机端专属修复】解决标题紧贴转盘的问题（≤768px 生效） */
+      /* 实际 HTML 中使用的是 .header 类，之前误用 .theme-header 导致样式未生效 */
+      /* 使用较大的 margin-bottom 确保标题与转盘之间有充足间距 */
+      .header {
+        /* 大幅增加标题区域与下方转盘的间距 */
+        margin-bottom: 80px !important;
       }
 
-      .theme-header .theme-title {
-        font-size: 1.6rem;
+      .header h1 {
         /* 增大标题与副标题间距 */
-        margin-bottom: 8px;
+        margin-bottom: 16px !important;
       }
 
-      .theme-header .theme-subtitle {
-        font-size: 0.9rem;
-        /* 增大副标题与下方转盘间距 */
-        margin-bottom: 16px;
+      .header p {
+        /* 大幅增加副标题与下方转盘间距 */
+        margin-bottom: 48px !important;
       }
 
       /* 移动端转盘容器尺寸自适应 */
-      /* 【关键修复】显著缩小转盘尺寸，避免在手机上顶天立地 */
       .wheel-container {
         width: clamp(220px, 68vw, 320px);
         height: clamp(220px, 68vw, 320px);
-        /* 显著增加转盘下方间距，避免按钮紧贴转盘 */
-        margin-bottom: 24px;
+        /* 大幅增加转盘下方间距，避免按钮紧贴转盘 */
+        margin-bottom: 56px;
       }
 
-      /* 移动端转盘光晕效果缩小 */
       .wheel-container::before {
         width: 105%;
         height: 105%;
@@ -1292,21 +1290,78 @@
 
       /* 移动端按钮与转盘间距优化 */
       .spin-btn {
-        /* 增大按钮与转盘间距 */
-        margin-top: 16px;
+        /* 大幅增加按钮与转盘间距 */
+        margin-top: 44px;
       }
 
-      /* 移动端提示文字间距优化 */
       .hint-text {
-        margin-top: 16px;
+        /* 增加提示文字与上方按钮的间距 */
+        margin-top: 28px;
       }
 
-      /* 【移动端修复】增大选项列表区域上间距 */
       .options-section {
-        margin-top: 24px;
+        /* 大幅增加选项列表区域上间距 */
+        margin-top: 56px;
       }
+
+      /* wheel-section 的 gap 也会影响转盘和按钮之间的间距 */
+      .wheel-section {
+        gap: 44px !important;
+      }
+
+      /* 确保 header 在小屏下也有最小高度，防止内容过度挤压 */
+      .header {
+        min-height: 120px;
       }
     }
+
+    /* =============================================
+       极小屏幕（≤400px）专属优化
+       当屏幕非常窄时，确保元素之间仍有安全间距
+       ============================================= */
+    @media (max-width: 400px) {
+      .container {
+        padding: 70px 12px 80px;
+      }
+
+      .header {
+        /* 在极小屏幕上仍然保持足够间距 */
+        margin-bottom: 70px !important;
+        min-height: 100px;
+      }
+
+      .header h1 {
+        margin-bottom: 12px !important;
+        font-size: 1.4rem !important;
+      }
+
+      .header p {
+        margin-bottom: 36px !important;
+        font-size: 0.85rem !important;
+      }
+
+      .wheel-container {
+        width: clamp(200px, 70vw, 280px);
+        height: clamp(200px, 70vw, 280px);
+        margin-bottom: 48px;
+      }
+
+      .spin-btn {
+        margin-top: 36px;
+      }
+
+      .hint-text {
+        margin-top: 24px;
+        font-size: 0.85rem !important;
+      }
+
+      .options-section {
+        margin-top: 48px;
+      }
+
+      .wheel-section {
+        gap: 36px !important;
+      }
 
     @media (max-width: 600px) {
       .options-section { padding: 24px 20px; }
