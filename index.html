@@ -480,8 +480,12 @@
       box-shadow: 
         0 0 40px rgba(0, 0, 0, 0.4),
         inset 0 0 20px rgba(0, 0, 0, 0.2);
-      /* 【移动端修复】移除 Canvas 的 touch-action: none，允许用户在转盘本体上也能正常滑动页面 */
-      /* 转盘的旋转由"开始旋转"按钮触发，不需要通过触摸 Canvas 来操作，因此移除此限制不影响转盘功能 */
+      /* 【移动端性能优化】强制 GPU 硬件加速，消除旋转动画卡顿掉帧 */
+      transform: translateZ(0);
+      will-change: transform;
+      /* 旋转动画中禁用抗锯齿插值，保持图案边缘清晰 */
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
     }
 
     .pointer {
@@ -2129,7 +2133,7 @@
       ctx.clearRect(0, 0, size, size);
       ctx.save();
       ctx.translate(centerX, centerY);
-      ctx.rotate(rotation);
+      // 【移动端性能优化】旋转不再在 Canvas 上下文中执行，改由 CSS transform 处理（GPU 硬件加速）
 
       const arcAngle = (2 * Math.PI) / options.length;
 
@@ -2213,6 +2217,15 @@
       ctx.fill();
 
       ctx.restore();
+
+      // 【移动端性能优化】绘制完成后，使用 CSS transform 应用旋转（GPU 硬件加速）
+      // 替代之前每帧重绘 Canvas 的做法，消除手机端卡顿和掉帧
+      if (rotation !== 0) {
+        dom.canvas.style.transform = 'translateZ(0) rotate(' + rotation + 'rad)';
+      } else {
+        // 重置旋转：切换场景等操作需要清除之前的 CSS 旋转
+        dom.canvas.style.transform = 'translateZ(0) rotate(0rad)';
+      }
     }
 
     function lightenColor(hex, percent) {
@@ -2695,7 +2708,9 @@
 
       spinAnimation(APP_CONFIG.spinDuration,
         (currentAngle) => {
-          drawWheel(state.options, APP_CONFIG.colors, currentAngle);
+          // 【移动端性能优化】使用 CSS transform 旋转替代每帧重绘 Canvas
+          // Canvas 内容只绘制一次，旋转由 GPU 硬件加速的 CSS 处理，消除卡顿掉帧
+          dom.canvas.style.transform = 'translateZ(0) rotate(' + currentAngle + 'rad)';
         },
         ({ index: targetIndex, rotation: targetRotation }) => {
           document.querySelector('.wheel-container').classList.remove('spinning');
