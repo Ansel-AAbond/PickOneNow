@@ -1331,6 +1331,34 @@
       box-shadow: 0 6px 16px rgba(255, 107, 107, 0.4);
     }
 
+    /* 广告容器通用样式 */
+    .ad-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 90px;
+    }
+
+    /* 电脑端：右侧悬浮固定广告 */
+    .ad-desktop {
+      position: fixed;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 160px;
+      z-index: 90;
+      margin: 0;
+      background: transparent;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* 移动端：隐藏桌面端广告，显示移动端广告 */
+    .ad-mobile {
+      display: none;
+    }
+
     /* 响应式适配 */
     @media (max-width: 768px) {
       .sidebar {
@@ -1449,6 +1477,15 @@
       .header {
         min-height: 120px;
       }
+
+      /* 移动端广告位适配 */
+      .ad-desktop {
+        display: none;
+      }
+
+      .ad-mobile {
+        display: flex;
+      }
     }
 
     /* =============================================
@@ -1561,6 +1598,17 @@
       </button>
     </div>
 
+  <!-- 电脑端广告位：右侧悬浮 -->
+  <div class="ad-container ad-desktop">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-9415987094178608"
+         data-ad-slot="8173312132"
+         data-ad-format="auto"
+         data-full-width-responsive="false"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+
     <nav id="sidebarNav" class="sidebar-nav">
       <div class="sidebar-nav-label">决策场景</div>
       <!-- 场景项由 JS 动态生成 -->
@@ -1588,6 +1636,17 @@
         <button id="spinBtn" class="spin-btn">开始旋转</button>
         <p id="hintText" class="hint-text"></p>
       </section>
+
+      <!-- 移动端广告位：转盘下方 -->
+      <div class="ad-container ad-mobile">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-9415987094178608"
+             data-ad-slot="8173312132"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+      </div>
 
       <section class="options-section">
         <h2>选项管理</h2>
