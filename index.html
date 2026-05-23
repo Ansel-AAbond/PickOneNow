@@ -1218,6 +1218,117 @@
       cursor: not-allowed;
     }
 
+    /* 关于区块样式 */
+    .about-section {
+      margin-top: 48px;
+      padding: 32px;
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--card-border);
+      transition: background-color 0.4s ease, border-color 0.4s ease;
+    }
+
+    .about-section h2 {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+
+    .about-section p {
+      color: var(--text-secondary);
+      line-height: 1.8;
+      margin-bottom: 12px;
+      font-size: 0.95rem;
+    }
+
+    .about-section strong {
+      color: var(--primary-color);
+    }
+
+    .privacy-link {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 0;
+      border: none;
+      background: none;
+      color: var(--secondary-color);
+      font-size: 0.9rem;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .privacy-link:hover {
+      color: var(--primary-color);
+    }
+
+    /* 隐私政策弹窗样式 */
+    .privacy-modal {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 36px;
+      max-width: 560px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      transform: scale(0.9) translateY(20px);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.4s ease;
+      box-shadow: var(--modal-shadow);
+      position: relative;
+      border: 1px solid var(--card-border);
+    }
+
+    .modal-overlay.active .privacy-modal {
+      transform: scale(1) translateY(0);
+    }
+
+    .privacy-modal h3 {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      color: var(--text-color);
+      margin-bottom: 20px;
+    }
+
+    .privacy-content h4 {
+      font-size: 1rem;
+      color: var(--primary-color);
+      margin-top: 16px;
+      margin-bottom: 8px;
+    }
+
+    .privacy-content p {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      line-height: 1.7;
+      margin-bottom: 8px;
+    }
+
+    .privacy-footer {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      margin-top: 20px;
+    }
+
+    .privacy-close-btn {
+      margin-top: 24px;
+      padding: 12px 32px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--primary-color), #ff8e53);
+      color: white;
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .privacy-close-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(255, 107, 107, 0.4);
+    }
+
     /* 响应式适配 */
     @media (max-width: 768px) {
       .sidebar {
@@ -1484,6 +1595,18 @@
         </div>
         <div id="optionsList" class="options-list"></div>
       </section>
+
+      <!-- 关于随机决策转盘 - SEO 文字内容 -->
+      <section class="about-section">
+        <h2>关于随机决策转盘</h2>
+        <p>随机决策转盘是一款免费实用的在线工具，帮助你快速做出选择。无论是<strong>今天吃什么</strong>、<strong>周末去哪玩</strong>，还是聚会玩什么，只需输入选项，点击旋转，转盘就会帮你随机决定。</p>
+        <p>支持自定义场景和选项，你可以创建属于自己的专属转盘。转盘旋转时带有流畅的动画和"咔"音效，让决策过程充满仪式感。支持深色/浅色主题切换，手机和电脑均可流畅使用。</p>
+        <p>使用场景包括：选择困难症决策、朋友聚会活动选择、团队团建活动、课堂随机点名、节日抽奖活动等。完全免费，无需注册，打开即用。</p>
+        <p style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--card-border); color: var(--text-muted); font-size: 0.85rem;">
+          💼 <strong style="color: var(--text-secondary);">企业定制服务</strong>：如需公司年会抽奖、企业活动定制转盘（如定制 Logo、品牌配色、中奖记录导出等），欢迎邮件联系：<a href="mailto:lzfeng258@gmail.com" style="color: var(--secondary-color); text-decoration: none; font-weight: 500;">lzfeng258@gmail.com</a>
+        </p>
+        <button id="privacyLink" class="privacy-link">隐私政策</button>
+      </section>
     </div>
   </div>
 
@@ -1494,6 +1617,32 @@
       <h3>决定就是它了！</h3>
       <p class="modal-result" id="modalResult"></p>
       <button id="modalCloseBtn" class="modal-close-btn">好的，就选这个</button>
+    </div>
+  </div>
+
+  <!-- 隐私政策弹窗 -->
+  <div id="privacyModalOverlay" class="modal-overlay">
+    <div class="privacy-modal">
+      <h3>隐私政策</h3>
+      <div class="privacy-content">
+        <h4>1. 信息收集</h4>
+        <p>本网站是一个纯前端工具，不会收集或存储任何个人身份信息。您在转盘中输入的选项数据仅保存在您本地浏览器的 localStorage 中，不会上传到任何服务器。</p>
+        
+        <h4>2. Cookie 和广告</h4>
+        <p>本网站可能使用 Google AdSense 广告服务和 Google Analytics 分析工具。这些第三方服务可能会在您的设备上设置 Cookie，用于展示相关广告和统计访问数据。您可以通过浏览器设置禁用 Cookie。</p>
+        
+        <h4>3. 数据安全</h4>
+        <p>由于所有数据均存储在您的本地设备上，我们无法访问或控制您的数据。清除浏览器缓存或删除 localStorage 将清除所有保存的设置和自定义场景。</p>
+        
+        <h4>4. 第三方链接</h4>
+        <p>本网站可能包含指向第三方网站的链接。我们对这些网站的内容和隐私政策不承担责任，建议您在使用前阅读其隐私政策。</p>
+        
+        <h4>5. 政策更新</h4>
+        <p>我们保留随时更新本隐私政策的权利。更新后的政策将在本网站公布，继续使用本网站即表示您同意接受更新后的政策。</p>
+        
+        <p class="privacy-footer">最后更新日期：2026 年 5 月</p>
+      </div>
+      <button id="privacyCloseBtn" class="privacy-close-btn">关闭</button>
     </div>
   </div>
 
@@ -3021,6 +3170,22 @@
 
       // 静音控制按钮
       dom.muteToggle.addEventListener('click', toggleMute);
+
+      // 隐私政策链接
+      document.getElementById('privacyLink').addEventListener('click', () => {
+        document.getElementById('privacyModalOverlay').classList.add('active');
+      });
+
+      // 关闭隐私政策弹窗
+      document.getElementById('privacyCloseBtn').addEventListener('click', () => {
+        document.getElementById('privacyModalOverlay').classList.remove('active');
+      });
+
+      document.getElementById('privacyModalOverlay').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('privacyModalOverlay')) {
+          document.getElementById('privacyModalOverlay').classList.remove('active');
+        }
+      });
 
       // 初始化拖拽排序功能
       initDragSort();
