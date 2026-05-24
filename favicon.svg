@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- 转盘外圈 -->
+  <circle cx="256" cy="256" r="240" fill="#1a1d28" stroke="#ffffff" stroke-width="8" />
+  
+  <!-- 转盘扇区 1 - 红色 -->
+  <path d="M256 256 L256 16 A240 240 0 0 1 496 256 Z" fill="#FF6B6B" />
+  
+  <!-- 转盘扇区 2 - 青绿色 -->
+  <path d="M256 256 L496 256 A240 240 0 0 1 256 496 Z" fill="#4ECDC4" />
+  
+  <!-- 转盘扇区 3 - 黄色 -->
+  <path d="M256 256 L256 496 A240 240 0 0 1 16 256 Z" fill="#FFE66D" />
+  
+  <!-- 转盘扇区 4 - 橙色 -->
+  <path d="M256 256 L16 256 A240 240 0 0 1 256 16 Z" fill="#FFA07A" />
+  
+  <!-- 外圈装饰点 -->
+  <circle cx="256" cy="32" r="12" fill="#ffffff" opacity="0.8" />
+  <circle cx="464" cy="128" r="12" fill="#ffffff" opacity="0.6" />
+  <circle cx="480" cy="256" r="12" fill="#ffffff" opacity="0.8" />
+  <circle cx="464" cy="384" r="12" fill="#ffffff" opacity="0.6" />
+  <circle cx="256" cy="480" r="12" fill="#ffffff" opacity="0.8" />
+  <circle cx="48" cy="384" r="12" fill="#ffffff" opacity="0.6" />
+  <circle cx="32" cy="256" r="12" fill="#ffffff" opacity="0.8" />
+  <circle cx="48" cy="128" r="12" fill="#ffffff" opacity="0.6" />
+  
+  <!-- 中心圆 -->
+  <circle cx="256" cy="256" r="40" fill="#ffffff" />
+  <circle cx="256" cy="256" r="32" fill="#FF6B6B" />
+  
+  <!-- 顶部指针 -->
+  <polygon points="256,16 244,56 268,56" fill="#ffffff" />
+</svg>

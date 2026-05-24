@@ -4,6 +4,14 @@
   <meta charset="UTF-8">
   <!-- 移动端视口设置：禁止缩放，确保页面宽度跟随设备宽度 -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <!-- Favicon：网页标签页图标（使用相对路径确保本地和部署环境均正常加载） -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <!-- 兼容性备用：部分旧浏览器不支持 SVG，提供 PNG 版本 -->
+  <link rel="icon" type="image/png" sizes="512x512" href="favicon.png">
+  <!-- 移动端桌面快捷方式图标（iOS Safari） -->
+  <link rel="apple-touch-icon" sizes="512x512" href="favicon.png">
+  <!-- PWA Web App Manifest（可选，用于添加到主屏幕时的图标和名称） -->
+  <meta name="theme-color" content="#1a1d28">
   <title>随机决策转盘</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -842,14 +850,16 @@
     }
 
     /* =============================================
-       主题切换按钮
-       固定在页面右上角，悬浮在内容之上
+       统一设置面板样式
+       将主题/静音/语言三个功能整合到一个下拉面板中
        ============================================= */
-    .theme-toggle {
+
+    /* 设置按钮（齿轮图标） */
+    .settings-btn {
       position: fixed;
       top: 16px;
       right: 16px;
-      z-index: 101;
+      z-index: 102;
       width: 44px;
       height: 44px;
       border: none;
@@ -865,60 +875,113 @@
       transition: all 0.3s ease;
     }
 
-    .theme-toggle:hover {
+    .settings-btn:hover {
       transform: scale(1.1);
       box-shadow: var(--shadow-md);
     }
 
-    .theme-toggle svg {
+    .settings-btn svg {
       width: 20px;
       height: 20px;
-      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: transform 0.4s ease;
     }
 
-    /* 主题切换时图标旋转动画 */
-    .theme-toggle.switching svg {
-      transform: rotate(360deg);
+    /* 设置面板打开时齿轮旋转 */
+    .settings-btn.active svg {
+      transform: rotate(60deg);
     }
 
-    /* =============================================
-       静音控制按钮样式
-       与主题切换按钮保持一致的位置和样式
-       ============================================= */
-    .mute-toggle {
+    /* 设置下拉面板 */
+    .settings-panel {
       position: fixed;
-      top: 16px;
-      right: 68px;
+      top: 68px;
+      right: 16px;
       z-index: 101;
-      width: 44px;
-      height: 44px;
-      border: none;
-      border-radius: 12px;
+      width: 280px;
       background: var(--card-bg);
       border: 1px solid var(--card-border);
-      color: var(--text-color);
+      border-radius: 16px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+      padding: 8px 0;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-8px) scale(0.96);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    /* 面板打开状态 */
+    .settings-panel.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+    }
+
+    /* 面板中的设置项 */
+    .settings-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
       cursor: pointer;
+      transition: background-color 0.2s ease;
+      user-select: none;
+    }
+
+    .settings-item:hover {
+      background-color: var(--sidebar-item-active);
+    }
+
+    /* 设置项图标 */
+    .settings-item-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: var(--shadow-sm);
-      transition: all 0.3s ease;
+      font-size: 1.1rem;
+      margin-right: 12px;
+      flex-shrink: 0;
     }
 
-    .mute-toggle:hover {
-      transform: scale(1.1);
-      box-shadow: var(--shadow-md);
+    .settings-item-icon.theme-icon {
+      background: linear-gradient(135deg, #ffd93d, #ff6b6b);
     }
 
-    .mute-toggle svg {
-      width: 20px;
-      height: 20px;
-      transition: transform 0.3s ease;
+    .settings-item-icon.sound-icon {
+      background: linear-gradient(135deg, #4ecdc4, #44a08d);
     }
 
-    /* 静音状态：图标变灰 */
-    .mute-toggle.muted {
+    .settings-item-icon.lang-icon {
+      background: linear-gradient(135deg, #a78bfa, #7c3aed);
+    }
+
+    /* 设置项文字 */
+    .settings-item-label {
+      flex: 1;
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      color: var(--text-color);
+      font-weight: 500;
+    }
+
+    /* 设置项状态标签 */
+    .settings-item-status {
+      font-size: 0.8rem;
       color: var(--text-muted);
+      font-weight: 500;
+      padding: 2px 10px;
+      border-radius: 8px;
+      background: var(--sidebar-item-active);
+      transition: all 0.2s ease;
+    }
+
+    /* 面板分隔线 */
+    .settings-divider {
+      height: 1px;
+      background: var(--card-border);
+      margin: 4px 16px;
     }
 
     /* 场景切换时的淡入动画 */
@@ -1389,14 +1452,40 @@
       }
 
       /* 移动端右上角按钮组布局 */
-      .theme-toggle {
+      .settings-btn {
         right: 16px;
         top: 16px;
       }
 
-      .mute-toggle {
-        right: 68px;
-        top: 16px;
+      /* 移动端设置面板：全屏宽度，靠底部 */
+      .settings-panel {
+        top: auto;
+        bottom: 16px;
+        right: 16px;
+        left: 16px;
+        width: auto;
+        border-radius: 16px;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+
+      .settings-item {
+        padding: 14px 16px;
+      }
+
+      .settings-item-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+      }
+
+      .settings-item-label {
+        font-size: 1rem;
+      }
+
+      .settings-item-status {
+        font-size: 0.85rem;
+        padding: 3px 12px;
       }
 
       .container {
@@ -1547,32 +1636,6 @@
 </head>
 <body>
 
-  <!-- =============================================
-       主题切换按钮
-       浅色模式显示月亮图标（提示可切换为深色）
-       深色模式显示太阳图标（提示可切换为浅色）
-       ============================================= -->
-  <button id="themeToggle" class="theme-toggle" aria-label="切换主题">
-    <!-- 默认显示月亮图标（当前为深色模式时的太阳图标会通过 JS 动态切换） -->
-    <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-    </svg>
-  </button>
-
-  <!-- =============================================
-       静音控制按钮
-       放在主题切换按钮旁边，用于全局音效开关
-       默认开启音效（喇叭图标），点击后切换为静音（静音喇叭图标）
-       ============================================= -->
-  <button id="muteToggle" class="mute-toggle" aria-label="切换静音模式">
-    <!-- 默认显示喇叭图标（音效开启状态） -->
-    <svg id="muteIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-      <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-      <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
-    </svg>
-  </button>
-
   <!-- 移动端汉堡菜单按钮 -->
   <button id="mobileMenuBtn" class="mobile-menu-btn" aria-label="打开菜单">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -1582,6 +1645,46 @@
     </svg>
   </button>
 
+  <!-- =============================================
+       统一设置按钮 + 下拉面板
+       将主题切换、静音控制、语言切换整合为一个设置面板
+       ============================================= -->
+  <!-- 设置按钮（齿轮图标） -->
+  <button id="settingsBtn" class="settings-btn" aria-label="设置">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3"></circle>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+    </svg>
+  </button>
+
+  <!-- 设置下拉面板 -->
+  <div id="settingsPanel" class="settings-panel">
+    <!-- 主题切换 -->
+    <div class="settings-item" id="settingsTheme">
+      <div class="settings-item-icon theme-icon">🌓</div>
+      <span class="settings-item-label" data-i18n="themeSwitch">切换主题</span>
+      <span class="settings-item-status" id="settingsThemeStatus">深色</span>
+    </div>
+
+    <div class="settings-divider"></div>
+
+    <!-- 音效开关 -->
+    <div class="settings-item" id="settingsSound">
+      <div class="settings-item-icon sound-icon">🔊</div>
+      <span class="settings-item-label" data-i18n="soundSwitch">音效</span>
+      <span class="settings-item-status" id="settingsSoundStatus">开启</span>
+    </div>
+
+    <div class="settings-divider"></div>
+
+    <!-- 语言切换 -->
+    <div class="settings-item" id="settingsLang">
+      <div class="settings-item-icon lang-icon">🌐</div>
+      <span class="settings-item-label" data-i18n="langSwitch">切换语言</span>
+      <span class="settings-item-status" id="settingsLangStatus">中文</span>
+    </div>
+  </div>
+
   <!-- 移动端遮罩 -->
   <div id="sidebarOverlay" class="sidebar-overlay"></div>
 
@@ -1590,7 +1693,7 @@
        ============================================= -->
   <aside id="sidebar" class="sidebar">
     <div class="sidebar-header">
-      <span class="sidebar-title">场景导航</span>
+      <span class="sidebar-title" data-i18n="sidebarTitle">场景导航</span>
       <button id="sidebarToggle" class="sidebar-toggle" aria-label="收起侧边栏">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="15 18 9 12 15 6"></polyline>
@@ -1610,12 +1713,12 @@
   </div>
 
     <nav id="sidebarNav" class="sidebar-nav">
-      <div class="sidebar-nav-label">决策场景</div>
+      <div class="sidebar-nav-label" data-i18n="sidebarNavLabel">决策场景</div>
       <!-- 场景项由 JS 动态生成 -->
     </nav>
 
     <div class="sidebar-footer">
-      <span>随机决策转盘 v2.0</span>
+      <span data-i18n="sidebarFooter">随机决策转盘 v2.0</span>
     </div>
   </aside>
 
@@ -1624,7 +1727,7 @@
     <div class="container">
       <header class="header">
         <h1 id="themeTitle"></h1>
-        <p>让选择变得简单有趣</p>
+        <p data-i18n="subtitle">让选择变得简单有趣</p>
       </header>
 
       <section class="wheel-section">
@@ -1633,7 +1736,7 @@
           <canvas id="wheelCanvas"></canvas>
         </div>
 
-        <button id="spinBtn" class="spin-btn">开始旋转</button>
+        <button id="spinBtn" class="spin-btn" data-i18n="spinBtn">开始旋转</button>
         <p id="hintText" class="hint-text"></p>
       </section>
 
@@ -1649,24 +1752,24 @@
       </div>
 
       <section class="options-section">
-        <h2>选项管理</h2>
+        <h2 data-i18n="optionsTitle">选项管理</h2>
         <div class="options-input-group">
-          <input type="text" id="optionInput" placeholder="输入新选项，按回车或点击添加..." maxlength="20">
-          <button id="addBtn" class="add-btn">添加选项</button>
+          <input type="text" id="optionInput" data-i18n-placeholder="optionInput" placeholder="输入新选项，按回车或点击添加..." maxlength="20">
+          <button id="addBtn" class="add-btn" data-i18n="addBtn">添加选项</button>
         </div>
         <div id="optionsList" class="options-list"></div>
       </section>
 
       <!-- 关于随机决策转盘 - SEO 文字内容 -->
       <section class="about-section">
-        <h2>关于随机决策转盘</h2>
-        <p>随机决策转盘是一款免费实用的在线工具，帮助你快速做出选择。无论是<strong>今天吃什么</strong>、<strong>周末去哪玩</strong>，还是聚会玩什么，只需输入选项，点击旋转，转盘就会帮你随机决定。</p>
-        <p>支持自定义场景和选项，你可以创建属于自己的专属转盘。转盘旋转时带有流畅的动画和"咔"音效，让决策过程充满仪式感。支持深色/浅色主题切换，手机和电脑均可流畅使用。</p>
-        <p>使用场景包括：选择困难症决策、朋友聚会活动选择、团队团建活动、课堂随机点名、节日抽奖活动等。完全免费，无需注册，打开即用。</p>
+        <h2 data-i18n="aboutTitle">关于随机决策转盘</h2>
+        <p data-i18n="aboutDesc1">随机决策转盘是一款免费实用的在线工具，帮助你快速做出选择。无论是<strong>今天吃什么</strong>、<strong>周末去哪玩</strong>，还是聚会玩什么，只需输入选项，点击旋转，转盘就会帮你随机决定。</p>
+        <p data-i18n="aboutDesc2">支持自定义场景和选项，你可以创建属于自己的专属转盘。转盘旋转时带有流畅的动画和"咔"音效，让决策过程充满仪式感。支持深色/浅色主题切换，手机和电脑均可流畅使用。</p>
+        <p data-i18n="aboutDesc3">使用场景包括：选择困难症决策、朋友聚会活动选择、团队团建活动、课堂随机点名、节日抽奖活动等。完全免费，无需注册，打开即用。</p>
         <p style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--card-border); color: var(--text-muted); font-size: 0.85rem;">
-          💼 <strong style="color: var(--text-secondary);">企业定制服务</strong>：如需公司年会抽奖、企业活动定制转盘（如定制 Logo、品牌配色、中奖记录导出等），欢迎邮件联系：<a href="mailto:lzfeng258@gmail.com" style="color: var(--secondary-color); text-decoration: none; font-weight: 500;">lzfeng258@gmail.com</a>
+          <span data-i18n="aboutEnterprise">💼 <strong>企业定制服务</strong>：如需公司年会抽奖、企业活动定制转盘（如定制 Logo、品牌配色、中奖记录导出等），欢迎邮件联系：</span><a href="mailto:lzfeng258@gmail.com" style="color: var(--secondary-color); text-decoration: none; font-weight: 500;">lzfeng258@gmail.com</a>
         </p>
-        <button id="privacyLink" class="privacy-link">隐私政策</button>
+        <button id="privacyLink" class="privacy-link" data-i18n="privacyLink">隐私政策</button>
       </section>
     </div>
   </div>
@@ -1675,35 +1778,35 @@
   <div id="modalOverlay" class="modal-overlay">
     <div class="modal">
       <div class="modal-emoji" id="modalEmoji"></div>
-      <h3>决定就是它了！</h3>
+      <h3 data-i18n="modalTitle">决定就是它了！</h3>
       <p class="modal-result" id="modalResult"></p>
-      <button id="modalCloseBtn" class="modal-close-btn">好的，就选这个</button>
+      <button id="modalCloseBtn" class="modal-close-btn" data-i18n="modalCloseBtn">好的，就选这个</button>
     </div>
   </div>
 
   <!-- 隐私政策弹窗 -->
   <div id="privacyModalOverlay" class="modal-overlay">
     <div class="privacy-modal">
-      <h3>隐私政策</h3>
+      <h3 data-i18n="privacyTitle">隐私政策</h3>
       <div class="privacy-content">
-        <h4>1. 信息收集</h4>
-        <p>本网站是一个纯前端工具，不会收集或存储任何个人身份信息。您在转盘中输入的选项数据仅保存在您本地浏览器的 localStorage 中，不会上传到任何服务器。</p>
+        <h4 data-i18n="privacySection1">1. 信息收集</h4>
+        <p data-i18n="privacyContent1">本网站是一个纯前端工具，不会收集或存储任何个人身份信息。您在转盘中输入的选项数据仅保存在您本地浏览器的 localStorage 中，不会上传到任何服务器。</p>
         
-        <h4>2. Cookie 和广告</h4>
-        <p>本网站可能使用 Google AdSense 广告服务和 Google Analytics 分析工具。这些第三方服务可能会在您的设备上设置 Cookie，用于展示相关广告和统计访问数据。您可以通过浏览器设置禁用 Cookie。</p>
+        <h4 data-i18n="privacySection2">2. Cookie 和广告</h4>
+        <p data-i18n="privacyContent2">本网站可能使用 Google AdSense 广告服务和 Google Analytics 分析工具。这些第三方服务可能会在您的设备上设置 Cookie，用于展示相关广告和统计访问数据。您可以通过浏览器设置禁用 Cookie。</p>
         
-        <h4>3. 数据安全</h4>
-        <p>由于所有数据均存储在您的本地设备上，我们无法访问或控制您的数据。清除浏览器缓存或删除 localStorage 将清除所有保存的设置和自定义场景。</p>
+        <h4 data-i18n="privacySection3">3. 数据安全</h4>
+        <p data-i18n="privacyContent3">由于所有数据均存储在您的本地设备上，我们无法访问或控制您的数据。清除浏览器缓存或删除 localStorage 将清除所有保存的设置和自定义场景。</p>
         
-        <h4>4. 第三方链接</h4>
-        <p>本网站可能包含指向第三方网站的链接。我们对这些网站的内容和隐私政策不承担责任，建议您在使用前阅读其隐私政策。</p>
+        <h4 data-i18n="privacySection4">4. 第三方链接</h4>
+        <p data-i18n="privacyContent4">本网站可能包含指向第三方网站的链接。我们对这些网站的内容和隐私政策不承担责任，建议您在使用前阅读其隐私政策。</p>
         
-        <h4>5. 政策更新</h4>
-        <p>我们保留随时更新本隐私政策的权利。更新后的政策将在本网站公布，继续使用本网站即表示您同意接受更新后的政策。</p>
+        <h4 data-i18n="privacySection5">5. 政策更新</h4>
+        <p data-i18n="privacyContent5">我们保留随时更新本隐私政策的权利。更新后的政策将在本网站公布，继续使用本网站即表示您同意接受更新后的政策。</p>
         
-        <p class="privacy-footer">最后更新日期：2026 年 5 月</p>
+        <p class="privacy-footer" data-i18n="privacyFooter">最后更新日期：2026 年 5 月</p>
       </div>
-      <button id="privacyCloseBtn" class="privacy-close-btn">关闭</button>
+      <button id="privacyCloseBtn" class="privacy-close-btn" data-i18n="closeBtn">关闭</button>
     </div>
   </div>
 
@@ -1713,22 +1816,22 @@
        ============================================= -->
   <div id="customSceneModalOverlay" class="modal-overlay">
     <div class="custom-scene-modal">
-      <h3>✨ 新建自定义场景</h3>
-      <p class="modal-hint">创建属于你自己的转盘！设置场景名称和选项后，新场景会出现在左侧列表并自动保存。</p>
+      <h3 data-i18n="customSceneTitle">✨ 新建自定义场景</h3>
+      <p class="modal-hint" data-i18n="customSceneHint">创建属于你自己的转盘！设置场景名称和选项后，新场景会出现在左侧列表并自动保存。</p>
       
       <div class="form-group">
-        <label for="customSceneName">场景名称</label>
-        <input type="text" id="customSceneName" placeholder="例如：周末去哪玩、今天看什么电影..." maxlength="20">
+        <label for="customSceneName" data-i18n="customSceneNameLabel">场景名称</label>
+        <input type="text" id="customSceneName" data-i18n-placeholder="customSceneNamePlaceholder" placeholder="例如：周末去哪玩、今天看什么电影..." maxlength="20">
       </div>
 
       <div class="form-group">
-        <label for="customSceneOptions">选项列表</label>
-        <textarea id="customSceneOptions" placeholder="每行输入一个选项，例如：&#10;火锅&#10;烧烤&#10;日料&#10;披萨&#10;麻辣烫"></textarea>
+        <label for="customSceneOptions" data-i18n="customSceneOptionsLabel">选项列表</label>
+        <textarea id="customSceneOptions" data-i18n-placeholder="customSceneOptionsPlaceholder" placeholder="每行输入一个选项，例如：&#10;火锅&#10;烧烤&#10;日料&#10;披萨&#10;麻辣烫"></textarea>
       </div>
 
       <div class="modal-actions">
-        <button id="customSceneCancel" class="btn-cancel">取消</button>
-        <button id="customSceneSave" class="btn-save">保存场景</button>
+        <button id="customSceneCancel" class="btn-cancel" data-i18n="cancelBtn">取消</button>
+        <button id="customSceneSave" class="btn-save" data-i18n="saveBtn">保存场景</button>
       </div>
     </div>
   </div>
@@ -1765,6 +1868,229 @@
         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
       </svg>`
     };
+
+    /**
+     * =============================================
+     * 语言切换模块（i18n）
+     * 支持中文 / English 切换
+     * 语言偏好保存在 localStorage 中
+     * =============================================
+     */
+
+    const LANG_STORAGE_KEY = 'wheel-lang-preference';
+
+    const TRANSLATIONS = {
+      zh: {
+        sidebarTitle: '场景导航',
+        sidebarNavLabel: '决策场景',
+        sidebarFooter: '随机决策转盘 v2.0',
+        subtitle: '让选择变得简单有趣',
+        spinBtn: '开始旋转',
+        optionsTitle: '选项管理',
+        optionInput: '输入新选项，按回车或点击添加...',
+        addBtn: '添加选项',
+        aboutTitle: '关于随机决策转盘',
+        aboutDesc1: '随机决策转盘是一款免费实用的在线工具，帮助你快速做出选择。无论是<strong>今天吃什么</strong>、<strong>周末去哪玩</strong>，还是聚会玩什么，只需输入选项，点击旋转，转盘就会帮你随机决定。',
+        aboutDesc2: '支持自定义场景和选项，你可以创建属于自己的专属转盘。转盘旋转时带有流畅的动画和"咔"音效，让决策过程充满仪式感。支持深色/浅色主题切换，手机和电脑均可流畅使用。',
+        aboutDesc3: '使用场景包括：选择困难症决策、朋友聚会活动选择、团队团建活动、课堂随机点名、节日抽奖活动等。完全免费，无需注册，打开即用。',
+        aboutEnterprise: '💼 <strong>企业定制服务</strong>：如需公司年会抽奖、企业活动定制转盘（如定制 Logo、品牌配色、中奖记录导出等），欢迎邮件联系：',
+        privacyLink: '隐私政策',
+        modalTitle: '决定就是它了！',
+        modalCloseBtn: '好的，就选这个',
+        privacyTitle: '隐私政策',
+        privacySection1: '1. 信息收集',
+        privacyContent1: '本网站是一个纯前端工具，不会收集或存储任何个人身份信息。您在转盘中输入的选项数据仅保存在您本地浏览器的 localStorage 中，不会上传到任何服务器。',
+        privacySection2: '2. Cookie 和广告',
+        privacyContent2: '本网站可能使用 Google AdSense 广告服务和 Google Analytics 分析工具。这些第三方服务可能会在您的设备上设置 Cookie，用于展示相关广告和统计访问数据。您可以通过浏览器设置禁用 Cookie。',
+        privacySection3: '3. 数据安全',
+        privacyContent3: '由于所有数据均存储在您的本地设备上，我们无法访问或控制您的数据。清除浏览器缓存或删除 localStorage 将清除所有保存的设置和自定义场景。',
+        privacySection4: '4. 第三方链接',
+        privacyContent4: '本网站可能包含指向第三方网站的链接。我们对这些网站的内容和隐私政策不承担责任，建议您在使用前阅读其隐私政策。',
+        privacySection5: '5. 政策更新',
+        privacyContent5: '我们保留随时更新本隐私政策的权利。更新后的政策将在本网站公布，继续使用本网站即表示您同意接受更新后的政策。',
+        privacyFooter: '最后更新日期：2026 年 5 月',
+        closeBtn: '关闭',
+        customSceneTitle: '✨ 新建自定义场景',
+        customSceneHint: '创建属于你自己的转盘！设置场景名称和选项后，新场景会出现在左侧列表并自动保存。',
+        customSceneNameLabel: '场景名称',
+        customSceneNamePlaceholder: '例如：周末去哪玩、今天看什么电影...',
+        customSceneOptionsLabel: '选项列表',
+        customSceneOptionsPlaceholder: '每行输入一个选项，例如：\n火锅\n烧烤\n日料\n披萨\n麻辣烫',
+        cancelBtn: '取消',
+        saveBtn: '保存场景',
+        pageTitle: '随机决策转盘',
+        addSceneBtn: '+ 新建自定义场景',
+        mobileMenuBtn: '打开菜单',
+        spinningHint: '旋转中...',
+        minOptionsHint: '️ 至少需要 2 个选项才能旋转',
+        optionsHint: '当前共有 {count} 个选项，点击按钮开始决定吧！',
+        duplicateHint: '该选项已存在，请输入新选项...',
+        deleteConfirm: '确定要删除这个自定义场景吗？',
+        switchToLight: '切换到浅色模式',
+        switchToDark: '切换到深色模式',
+        dragHandle: '拖拽排序',
+        muteOn: '取消静音',
+        muteOff: '静音模式',
+        themeSwitch: '切换主题',
+        langSwitch: '切换语言',
+        langToEn: 'Switch to English',
+        langToZh: '切换为中文',
+        closeSidebar: '收起侧边栏',
+        openMenu: '打开菜单',
+        deleteScene: '删除场景',
+        countZh: '项',
+        countEn: ' items'
+      },
+      en: {
+        sidebarTitle: 'Scenes',
+        sidebarNavLabel: 'Scenes',
+        sidebarFooter: 'Decision Wheel v2.0',
+        subtitle: 'Making choices simple and fun',
+        spinBtn: 'SPIN',
+        optionsTitle: 'Options',
+        optionInput: 'Type a new option, press Enter or click Add...',
+        addBtn: 'Add',
+        aboutTitle: 'About Decision Wheel',
+        aboutDesc1: 'Decision Wheel is a free online tool that helps you make choices quickly. Whether it\'s <strong>what to eat today</strong>, <strong>where to go this weekend</strong>, or what game to play, just enter your options, spin the wheel, and let fate decide.',
+        aboutDesc2: 'Customize scenes and options to create your own unique wheel. Smooth animations and satisfying "tick" sounds make the decision process delightful. Dark/light themes available. Works seamlessly on mobile and desktop.',
+        aboutDesc3: 'Use cases include: decision-making for the indecisive, party game selection, team-building activities, classroom random selection, festival lucky draws, and more. Completely free, no sign-up required.',
+        aboutEnterprise: '💼 <strong>Enterprise Customization</strong>: For corporate annual party lucky draws or custom-branded wheels (custom Logo, brand colors, winner export, etc.), please contact us at: ',
+        privacyLink: 'Privacy Policy',
+        modalTitle: 'That\'s the one!',
+        modalCloseBtn: 'Got it!',
+        privacyTitle: 'Privacy Policy',
+        privacySection1: '1. Information Collection',
+        privacyContent1: 'This website is a pure frontend tool and does not collect or store any personal identification information. The options you enter are saved only in your browser\'s localStorage and are never uploaded to any server.',
+        privacySection2: '2. Cookies and Advertising',
+        privacyContent2: 'This website may use Google AdSense advertising services and Google Analytics. These third-party services may set cookies on your device to display relevant ads and collect analytics data. You can disable cookies through your browser settings.',
+        privacySection3: '3. Data Security',
+        privacyContent3: 'Since all data is stored on your local device, we cannot access or control your data. Clearing your browser cache or deleting localStorage will erase all saved settings and custom scenes.',
+        privacySection4: '4. Third-Party Links',
+        privacyContent4: 'This website may contain links to third-party websites. We are not responsible for their content or privacy policies. We recommend reading their policies before use.',
+        privacySection5: '5. Policy Updates',
+        privacyContent5: 'We reserve the right to update this privacy policy at any time. Updated policies will be posted on this website. Continued use constitutes acceptance of the updated policy.',
+        privacyFooter: 'Last updated: May 2026',
+        closeBtn: 'Close',
+        customSceneTitle: '✨ New Custom Scene',
+        customSceneHint: 'Create your own wheel! Set a scene name and options. The new scene will appear in the left sidebar and be auto-saved.',
+        customSceneNameLabel: 'Scene Name',
+        customSceneNamePlaceholder: 'e.g., Weekend Plans, Movies to Watch...',
+        customSceneOptionsLabel: 'Options List',
+        customSceneOptionsPlaceholder: 'Enter one option per line, e.g.:\nHot Pot\nBBQ\nJapanese\nPizza\nSpicy Hot Pot',
+        cancelBtn: 'Cancel',
+        saveBtn: 'Save Scene',
+        pageTitle: 'Decision Wheel',
+        addSceneBtn: '+ New Custom Scene',
+        mobileMenuBtn: 'Open Menu',
+        spinningHint: 'Spinning...',
+        minOptionsHint: '⚠️ Need at least 2 options to spin',
+        optionsHint: '{count} options ready. Click the button to decide!',
+        duplicateHint: 'This option already exists, please enter a new one...',
+        deleteConfirm: 'Are you sure you want to delete this custom scene?',
+        switchToLight: 'Switch to light mode',
+        switchToDark: 'Switch to dark mode',
+        dragHandle: 'Drag to reorder',
+        muteOn: 'Unmute',
+        muteOff: 'Muted',
+        themeSwitch: 'Switch theme',
+        langSwitch: 'Switch language',
+        langToEn: 'Switch to English',
+        langToZh: 'Switch to Chinese',
+        closeSidebar: 'Close Sidebar',
+        openMenu: 'Open Menu',
+        deleteScene: 'Delete Scene',
+        countZh: '项',
+        countEn: ' items'
+      }
+    };
+
+    let currentLang = 'zh';
+
+    /**
+     * 应用语言翻译
+     * 遍历所有带有 data-i18n 属性的元素，替换为对应语言的文本
+     * 同时更新带有 data-i18n-placeholder 的元素的 placeholder 属性
+     */
+    function applyLanguage(lang) {
+      const t = TRANSLATIONS[lang];
+      if (!t) return;
+
+      // 更新文本内容
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (t[key]) {
+          el.innerHTML = t[key];
+        }
+      });
+
+      // 更新 placeholder
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if (t[key]) {
+          el.placeholder = t[key];
+        }
+      });
+
+      // 更新页面标题
+      document.title = t.pageTitle;
+
+      // 更新 HTML lang 属性
+      document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+
+      // 更新移动端菜单按钮 aria-label
+      const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+      if (mobileMenuBtn) {
+        mobileMenuBtn.setAttribute('aria-label', t.mobileMenuBtn);
+      }
+
+      // 更新侧边栏收起按钮 aria-label
+      const sidebarToggle = document.getElementById('sidebarToggle');
+      if (sidebarToggle) {
+        sidebarToggle.setAttribute('aria-label', lang === 'zh' ? '收起侧边栏' : 'Close Sidebar');
+      }
+
+      // 更新设置按钮 aria-label
+      if (dom.settingsBtn) {
+        dom.settingsBtn.setAttribute('aria-label', lang === 'zh' ? '设置' : 'Settings');
+      }
+
+      // 更新新建自定义场景按钮文本
+      const addSceneBtn = document.getElementById('addSceneBtn');
+      if (addSceneBtn && addSceneBtn.querySelector('.sidebar-item-text')) {
+        addSceneBtn.querySelector('.sidebar-item-text').textContent = t.addSceneBtn;
+      }
+
+      // 更新设置面板状态标签（语言切换后同步更新显示文字）
+      // 注意：dom 对象在 initDOM() 中才初始化，所以在页面初始化阶段此调用会被跳过
+      if (dom.settingsThemeStatus) {
+        updateSettingsStatus();
+      }
+
+      // 重新渲染侧边栏以更新动态生成的文本
+      renderSidebarItems();
+    }
+
+    /**
+     * 切换语言
+     * 在中文和英文之间切换，并保存到 localStorage
+     */
+    function toggleLanguage() {
+      currentLang = currentLang === 'zh' ? 'en' : 'zh';
+      localStorage.setItem(LANG_STORAGE_KEY, currentLang);
+      applyLanguage(currentLang);
+    }
+
+    /**
+     * 初始化语言
+     * 从 localStorage 读取语言偏好，默认为中文
+     */
+    function initLanguage() {
+      const saved = localStorage.getItem(LANG_STORAGE_KEY);
+      if (saved === 'en' || saved === 'zh') {
+        currentLang = saved;
+      }
+      applyLanguage(currentLang);
+    }
 
     /**
      * localStorage 键名
@@ -1807,18 +2133,6 @@
     function applyTheme(theme, animate = true) {
       const html = document.documentElement;
       html.setAttribute('data-theme', theme);
-
-      // 更新按钮图标
-      const iconEl = document.getElementById('themeIcon');
-      iconEl.innerHTML = theme === 'dark' ? THEME_ICONS.sun : THEME_ICONS.moon;
-      iconEl.setAttribute('aria-label', theme === 'dark' ? '切换到浅色模式' : '切换到深色模式');
-
-      // 添加切换动画
-      if (animate) {
-        const btn = document.getElementById('themeToggle');
-        btn.classList.add('switching');
-        setTimeout(() => btn.classList.remove('switching'), 500);
-      }
 
       // 保存用户偏好
       localStorage.setItem(THEME_STORAGE_KEY, theme);
@@ -2031,33 +2345,11 @@
     }
 
     /**
-     * 更新静音按钮图标
-     * 静音状态：显示静音喇叭图标（带斜杠）
-     * 非静音状态：显示正常喇叭图标
+     * 更新静音图标（设置面板中已通过 updateSettingsStatus 处理状态显示）
+     * 此函数保留以兼容可能的后续功能扩展
      */
     function updateMuteIcon() {
-      const iconEl = document.getElementById('muteIcon');
-      const btnEl = document.getElementById('muteToggle');
-
-      if (isMuted) {
-        // 静音图标
-        iconEl.innerHTML = `
-          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-          <line x1="23" y1="9" x2="17" y2="15"></line>
-          <line x1="17" y1="9" x2="23" y2="15"></line>
-        `;
-        btnEl.classList.add('muted');
-        btnEl.setAttribute('aria-label', '取消静音');
-      } else {
-        // 正常喇叭图标
-        iconEl.innerHTML = `
-          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-          <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-          <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
-        `;
-        btnEl.classList.remove('muted');
-        btnEl.setAttribute('aria-label', '静音模式');
-      }
+      // 静音状态已通过 updateSettingsStatus 在设置面板中显示，此处无需额外操作
     }
 
     /**
@@ -2298,8 +2590,15 @@
       sidebarNav: document.getElementById('sidebarNav'),
       mobileMenuBtn: document.getElementById('mobileMenuBtn'),
       sidebarOverlay: document.getElementById('sidebarOverlay'),
-      themeToggle: document.getElementById('themeToggle'),
-      muteToggle: document.getElementById('muteToggle')
+      // 统一设置面板元素引用
+      settingsBtn: document.getElementById('settingsBtn'),
+      settingsPanel: document.getElementById('settingsPanel'),
+      settingsTheme: document.getElementById('settingsTheme'),
+      settingsSound: document.getElementById('settingsSound'),
+      settingsLang: document.getElementById('settingsLang'),
+      settingsThemeStatus: document.getElementById('settingsThemeStatus'),
+      settingsSoundStatus: document.getElementById('settingsSoundStatus'),
+      settingsLangStatus: document.getElementById('settingsLangStatus')
     };
 
     const dpr = window.devicePixelRatio || 1;
@@ -2323,6 +2622,27 @@
       dom.ctx.scale(dpr, dpr);
 
       updateUI();
+    }
+
+    /**
+     * 更新设置面板中的状态标签显示
+     * 根据当前主题、静音状态、语言设置，更新面板中各项的右侧状态文字
+     */
+    function updateSettingsStatus() {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+
+      // 更新主题状态（深色 / 浅色）
+      dom.settingsThemeStatus.textContent = currentTheme === 'dark' ? 
+        (currentLang === 'zh' ? '深色' : 'Dark') : 
+        (currentLang === 'zh' ? '浅色' : 'Light');
+
+      // 更新音效状态（开启 / 关闭）
+      dom.settingsSoundStatus.textContent = isMuted ? 
+        (currentLang === 'zh' ? '关闭' : 'Off') : 
+        (currentLang === 'zh' ? '开启' : 'On');
+
+      // 更新语言状态（中文 / English）
+      dom.settingsLangStatus.textContent = currentLang === 'zh' ? '中文' : 'English';
     }
 
     /**
@@ -2707,23 +3027,24 @@
     }
 
     function updateUI() {
+      const t = TRANSLATIONS[currentLang];
       const count = state.options.length;
 
       if (state.isSpinning) {
         dom.spinBtn.disabled = true;
         dom.spinBtn.classList.add('spinning');
-        dom.hint.textContent = '旋转中...';
+        dom.hint.textContent = t.spinningHint;
         dom.hint.classList.remove('warning');
       } else {
         dom.spinBtn.classList.remove('spinning');
 
         if (count < 2) {
           dom.spinBtn.disabled = true;
-          dom.hint.textContent = '⚠️ 至少需要 2 个选项才能旋转';
+          dom.hint.textContent = t.minOptionsHint;
           dom.hint.classList.add('warning');
         } else {
           dom.spinBtn.disabled = false;
-          dom.hint.textContent = `当前共有 ${count} 个选项，点击按钮开始决定吧！`;
+          dom.hint.textContent = t.optionsHint.replace('{count}', count);
           dom.hint.classList.remove('warning');
         }
       }
@@ -2757,7 +3078,8 @@
      * 自定义场景带删除按钮，预设场景不可删除
      */
     function renderSidebarItems() {
-      dom.sidebarNav.innerHTML = '<div class="sidebar-nav-label">决策场景</div>';
+      const t = TRANSLATIONS[currentLang];
+      dom.sidebarNav.innerHTML = `<div class="sidebar-nav-label">${t.sidebarNavLabel}</div>`;
 
       ALL_SCENES.forEach((scene, index) => {
         const item = document.createElement('div');
@@ -2765,14 +3087,16 @@
         item.dataset.index = index;
 
         // 预设场景无删除按钮，自定义场景有删除按钮
+        const deleteTitle = currentLang === 'zh' ? '删除场景' : 'Delete Scene';
         const deleteButtonHTML = scene.isCustom
-          ? `<button class="sidebar-item-delete" data-scene-id="${scene.id}" title="删除场景">🗑️</button>`
+          ? `<button class="sidebar-item-delete" data-scene-id="${scene.id}" title="${deleteTitle}">🗑️</button>`
           : '';
 
+        const countSuffix = currentLang === 'zh' ? '项' : ' items';
         item.innerHTML = `
           <span class="sidebar-item-icon">${scene.icon}</span>
           <span class="sidebar-item-text">${scene.themeName}</span>
-          <span class="sidebar-item-count">${scene.defaultOptions.length}项</span>
+          <span class="sidebar-item-count">${scene.defaultOptions.length}${countSuffix}</span>
           ${deleteButtonHTML}
         `;
 
@@ -2797,13 +3121,14 @@
 
       // 在侧边栏导航底部添加"+ 新建自定义场景"按钮
       const addBtn = document.createElement('button');
+      addBtn.id = 'addSceneBtn';
       addBtn.className = 'sidebar-add-btn';
       addBtn.innerHTML = `
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
           <line x1="12" y1="5" x2="12" y2="19"></line>
           <line x1="5" y1="12" x2="19" y2="12"></line>
         </svg>
-        <span>新建自定义场景</span>
+        <span class="sidebar-item-text">${t.addSceneBtn}</span>
       `;
       addBtn.addEventListener('click', openCustomSceneModal);
       dom.sidebarNav.appendChild(addBtn);
@@ -2815,7 +3140,8 @@
      * @param {Number} sceneIndex - 场景在 ALL_SCENES 中的索引
      */
     function handleDeleteCustomScene(sceneId, sceneIndex) {
-      if (!confirm('确定要删除这个自定义场景吗？')) return;
+      const t = TRANSLATIONS[currentLang];
+      if (!confirm(t.deleteConfirm)) return;
 
       // 从 localStorage 中删除
       removeCustomScene(sceneId);
@@ -2930,10 +3256,11 @@
 
       if (!value) return;
       if (state.options.includes(value)) {
+        const t = TRANSLATIONS[currentLang];
         dom.optionInput.value = '';
-        dom.optionInput.placeholder = '该选项已存在，请输入新选项...';
+        dom.optionInput.placeholder = t.duplicateHint;
         setTimeout(() => {
-          dom.optionInput.placeholder = '输入新选项，按回车或点击添加...';
+          dom.optionInput.placeholder = t.optionInput;
         }, 2000);
         return;
       }
@@ -3226,11 +3553,39 @@
         closeMobileSidebar();
       });
 
-      // 主题切换按钮
-      dom.themeToggle.addEventListener('click', toggleTheme);
+      // 统一设置面板：点击齿轮图标打开/关闭面板
+      dom.settingsBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dom.settingsBtn.classList.toggle('active');
+        dom.settingsPanel.classList.toggle('active');
+        updateSettingsStatus();
+      });
 
-      // 静音控制按钮
-      dom.muteToggle.addEventListener('click', toggleMute);
+      // 设置面板中的主题切换项
+      dom.settingsTheme.addEventListener('click', () => {
+        toggleTheme();
+        updateSettingsStatus();
+      });
+
+      // 设置面板中的音效切换项
+      dom.settingsSound.addEventListener('click', () => {
+        toggleMute();
+        updateSettingsStatus();
+      });
+
+      // 设置面板中的语言切换项
+      dom.settingsLang.addEventListener('click', () => {
+        toggleLanguage();
+        updateSettingsStatus();
+      });
+
+      // 点击面板外部区域关闭设置面板
+      document.addEventListener('click', (e) => {
+        if (!dom.settingsPanel.contains(e.target) && !dom.settingsBtn.contains(e.target)) {
+          dom.settingsBtn.classList.remove('active');
+          dom.settingsPanel.classList.remove('active');
+        }
+      });
 
       // 隐私政策链接
       document.getElementById('privacyLink').addEventListener('click', () => {
@@ -3289,6 +3644,9 @@
       // 先初始化主题，确保页面渲染时已经应用了正确的配色
       initTheme();
 
+      // 初始化语言偏好
+      initLanguage();
+
       // 初始化静音状态，读取用户上次保存的偏好
       initMuteState();
 
@@ -3299,6 +3657,9 @@
       drawWheel(state.options, APP_CONFIG.colors, 0);
       renderSidebarItems();
       initEvents();
+
+      // 初始化设置面板状态标签
+      updateSettingsStatus();
 
       // 【移动端适配】监听窗口大小变化，横竖屏切换时自动重绘转盘
       window.addEventListener('resize', handleResize);
