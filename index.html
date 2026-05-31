@@ -1402,6 +1402,82 @@
       min-height: 90px;
     }
 
+    /* Adsterra Direct Link 广告链接样式 */
+    .ad-direct-link {
+      display: flex;
+      justify-content: center;
+      margin-top: 24px;
+    }
+
+    .ad-direct-link a {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .ad-direct-link a:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+
+    .ad-direct-link-icon {
+      font-size: 1.2rem;
+    }
+
+    /* Adsterra Banner 广告容器样式 */
+    .adsterra-banner-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px 0;
+    }
+
+    .adsterra-ad-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
+    .adsterra-ad-wrapper .ad-label {
+      position: absolute;
+      top: -10px;
+      left: 0;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      background: var(--card-bg);
+      padding: 0 6px;
+      border-radius: 4px;
+      z-index: 1;
+    }
+
+    .adsterra-ad-content {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-width: 300px;
+      min-height: 250px;
+    }
+
+    /* 移动端：缩小 Banner 广告或隐藏 */
+    @media (max-width: 768px) {
+      .adsterra-ad-content {
+        transform: scale(0.85);
+        transform-origin: center top;
+        margin-bottom: -30px;
+      }
+    }
+
     /* 电脑端：右侧悬浮固定广告 */
     .ad-desktop {
       position: fixed;
@@ -1738,6 +1814,14 @@
 
         <button id="spinBtn" class="spin-btn" data-i18n="spinBtn">开始旋转</button>
         <p id="hintText" class="hint-text"></p>
+
+        <!-- Adsterra Direct Link 广告位 -->
+        <div class="ad-direct-link">
+          <a href="https://www.effectivecpmnetwork.com/trwpmcvj8?key=c17648de6f8defb06f97519fa5819dda" target="_blank" rel="noopener noreferrer sponsored">
+            <span class="ad-direct-link-icon">🎁</span>
+            <span class="ad-direct-link-text">发现更多有趣工具</span>
+          </a>
+        </div>
       </section>
 
       <!-- 移动端广告位：转盘下方 -->
@@ -1759,6 +1843,25 @@
         </div>
         <div id="optionsList" class="options-list"></div>
       </section>
+
+      <!-- Adsterra 300x250 Banner 广告位 -->
+      <div class="adsterra-banner-container">
+        <div class="adsterra-ad-wrapper">
+          <span class="ad-label">广告</span>
+          <div class="adsterra-ad-content">
+            <script>
+              atOptions = {
+                'key' : 'e8fec5f6a9ad625d393b91e637618553',
+                'format' : 'iframe',
+                'height' : 250,
+                'width' : 300,
+                'params' : {}
+              };
+            </script>
+            <script src="https://www.highperformanceformat.com/e8fec5f6a9ad625d393b91e637618553/invoke.js"></script>
+          </div>
+        </div>
+      </div>
 
       <!-- 关于随机决策转盘 - SEO 文字内容 -->
       <section class="about-section">
